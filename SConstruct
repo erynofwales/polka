@@ -20,31 +20,49 @@ DEBUG = True
 # some nice messages for each step of the build.
 BUILD_CMDS = False
 
-# Source directories. New directories should contain a SConscript file and be
-# added here.
-source_directories = Split("""
-    #src
-""")
-
 #
 # BUILD STUFF BELOW HERE
 #
 
+import os
 import os.path
+
+
+def which(program):
+    def is_executable(path):
+        return os.path.exists(path) and os.access(path, os.X_OK)
+
+    path, name = os.path.split(program)
+    if path:
+        if is_executable(program):
+            return program
+    else:
+        pathext = [''] + os.environ.get('PATHEXT', '').split(os.pathsep)
+        for path in os.environ.get('PATH', '').split(os.pathsep):
+            exe = os.path.join(path, program)
+            for ext in pathext:
+                candidate = exe + ext
+                if is_executable(candidate):
+                    return candidate
+    return None
+
+
+def get_bool_argument(arg):
+    try:
+        return bool(int(arg))
+    except ValueError:
+        pass
+    if arg in ('False', 'FALSE', 'false', ''):
+        return False
+    return True
+
 
 cflags='-Wall -Wextra -pedantic'
 common_env = Environment(
-    CC='clang',
-    CXX='clang++',
+    CC='clang' if which('clang') else 'gcc',
+    CXX='clang++' if which('clang++') else 'g++',
     CFLAGS=cflags + ' -std=c99',
     CXXFLAGS=cflags + ' -std=c++11')
-
-def get_bool_argument(arg):
-    if bool(int(arg)):
-        return True
-    if arg == ('True', 'TRUE', 'true'):
-        return True
-    return False
 
 BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', BUILD_CMDS))
 if not BUILD_CMDS:
@@ -57,18 +75,18 @@ if not BUILD_CMDS:
     common_env['ARCOMSTR'] = generate_comstr('Archiving'),
     common_env['RANLIBCOMSTR'] = generate_comstr('Indexing')
 
+src_dir = Dir('#src')
+
 debug_env = common_env.Clone()
-debug_env.VariantDir(os.path.join('build', 'debug'), 'src', duplicate=0)
+debug_env.VariantDir(os.path.join('build', 'debug'), src_dir, duplicate=0)
 debug_env.Append(CPPDEFINES=['DEBUG'])
 debug_cflags = ' -O0 -g'
 debug_env.Append(CFLAGS=debug_cflags, CXXFLAGS=debug_cflags)
 
 release_env = common_env.Clone()
-release_env.VariantDir(os.path.join('build', 'release'), 'src', duplicate=0)
+release_env.VariantDir(os.path.join('build', 'release'), src_dir, duplicate=0)
 release_cflags = ' -O2'
 release_env.Append(CPPDEFINES=['RELEASE'])
 
-for d in source_directories:
-    sc = os.path.join(d, 'SConscript')
-    debug_env.SConscript(sc, {'env': debug_env})
-    release_env.SConscript(sc, {'env': release_env})
+for mode, env in {'debug': debug_env, 'release': release_env}.iteritems():
+    env.SConscript(os.path.join('build', mode, 'SConscript'), {'env': env})
