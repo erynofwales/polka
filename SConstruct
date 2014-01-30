@@ -1,7 +1,8 @@
 # SConstruct
 # vim: set ft=python:
 #
-# Toplevel Scons build script for the Charles project.
+# Toplevel Scons build script. This should be mostly complete and generic enough
+# for most builds.
 #
 # Eryn Wells <eryn@erynwells.me>
 
@@ -16,7 +17,7 @@
 #   3. Sets the DEBUG define
 DEBUG = True
 
-# Show build commands ("cc [args] -o [out] [file], etc"). If this is False, show
+# Show build commands ("cc [args] -o [out] [file]", etc). If this is False, show
 # some nice messages for each step of the build.
 BUILD_CMDS = False
 
@@ -67,12 +68,12 @@ common_env = Environment(
 BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', BUILD_CMDS))
 if not BUILD_CMDS:
     def generate_comstr(action):
-        return '%18s: $TARGET' % (action,)
-    common_env['ASCOMSTR'] = generate_comstr('Assembling'),
-    common_env['CCCOMSTR'] = generate_comstr('Building (C)'),
-    common_env['CXXCOMSTR'] = generate_comstr('Building (C++)'),
-    common_env['LINKCOMSTR'] = generate_comstr('Linking'),
-    common_env['ARCOMSTR'] = generate_comstr('Archiving'),
+        return '{:>18}: $TARGET'.format(action)
+    common_env['ASCOMSTR'] = generate_comstr('Assembling')
+    common_env['CCCOMSTR'] = generate_comstr('Building (C)')
+    common_env['CXXCOMSTR'] = generate_comstr('Building (C++)')
+    common_env['LINKCOMSTR'] = generate_comstr('Linking')
+    common_env['ARCOMSTR'] = generate_comstr('Archiving')
     common_env['RANLIBCOMSTR'] = generate_comstr('Indexing')
 
 src_dir = Dir('#src')
@@ -85,8 +86,9 @@ debug_env.Append(CFLAGS=debug_cflags, CXXFLAGS=debug_cflags)
 
 release_env = common_env.Clone()
 release_env.VariantDir(os.path.join('build', 'release'), src_dir, duplicate=0)
-release_cflags = ' -O2'
 release_env.Append(CPPDEFINES=['RELEASE'])
+release_cflags = ' -O2'
+release_env.Append(CFLAGS=release_cflags, CXXFLAGS=release_cflags)
 
 for mode, env in {'debug': debug_env, 'release': release_env}.iteritems():
     env.SConscript(os.path.join('build', mode, 'SConscript'), {'env': env})
