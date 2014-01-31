@@ -11,11 +11,12 @@
 # DEFAULT CONFIGURATION VALUES
 #
 
-# Settings for the default compiler. Setting these overrides the defaults,
-# provided your compiler exists.
+# Settings for the default toolchain binaries. Setting these overrides the
+# defaults, provided your the given binary exists.
 CC = None
 CXX = None
 AS = None
+LINK = None
 
 # Same as above but for default CFLAGS. These are appended to both CFLAGS and
 # CXXFLAGS.
@@ -91,6 +92,7 @@ common_env = Environment()
 set_compiler(common_env, 'CC', CC, ('clang', 'gcc'), 'C compiler')
 set_compiler(common_env, 'CXX', CXX, ('clang++', 'g++'), 'C++ compiler')
 set_compiler(common_env, 'AS', AS, ('gas'), 'assembler')
+set_compiler(common_env, 'LINK', LINK, ('ld'), 'linker')
 common_env.Append(CFLAGS='{} -std=c99'.format(CFLAGS))
 common_env.Append(CXXFLAGS='{} -std=c++11'.format(CFLAGS))
 
