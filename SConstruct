@@ -100,21 +100,32 @@ if not BUILD_CMDS:
 
 src_dir = Dir('#src')
 
-debug_env = common_env.Clone()
-debug_build_dir = os.path.join('build', 'debug')
-debug_env.VariantDir(debug_build_dir, src_dir, duplicate=0)
-debug_env.Append(CPPDEFINES=['DEBUG'])
-debug_cflags = ' -O0 -g'
-debug_env.Append(CFLAGS=debug_cflags, CXXFLAGS=debug_cflags)
-debug_env.Clean('.', debug_build_dir)
 
-release_env = common_env.Clone()
-release_build_dir = os.path.join('build', 'release')
-release_env.VariantDir(release_build_dir, src_dir, duplicate=0)
-release_env.Append(CPPDEFINES=['RELEASE'])
+def create_env(variant_dir, appends=None):
+    env = common_env.Clone()
+    env.VariantDir(variant_dir, src_dir, duplicate=0)
+    env.Clean('.', variant_dir)
+    for k, v in appends.iteritems():
+        if k.startswith('='):
+            env[k[1:]] = v
+        else:
+            env.Append(**{k: v})
+    return env
+
+
+debug_cflags = ' -O0 -g'
+debug_env = create_env(os.path.join('build', 'debug'), {
+    'CPPDEFINES': ['DEBUG'],
+    'CFLAGS': debug_cflags,
+    'CXXFLAGS': debug_cflags,
+})
+
 release_cflags = ' -O2'
-release_env.Append(CFLAGS=release_cflags, CXXFLAGS=release_cflags)
-release_env.Clean('.', release_build_dir)
+release_env = create_env(os.path.join('build', 'release'), {
+    'CPPDEFINES': ['RELEASE'],
+    'CFLAGS': release_cflags,
+    'CXXFLAGS': release_cflags,
+})
 
 modes = {
     'debug': debug_env,
@@ -131,5 +142,5 @@ if mode:
     env.SConscript(os.path.join('build', mode, 'SConscript'), {'env': env})
 else:
     # Build all modes.
-    for mode, env in {'debug': debug_env, 'release': release_env}.iteritems():
+    for mode, env in modes.iteritems():
         env.SConscript(os.path.join('build', mode, 'SConscript'), {'env': env})
