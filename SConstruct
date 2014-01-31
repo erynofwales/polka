@@ -68,24 +68,29 @@ def get_bool_argument(arg):
     return True
 
 
-def set_compiler(env, var, user_compiler, compilers, string=None):
+def set_compiler(env, var, user_compiler, compilers, compiler_string=None):
+    if not string:
+        string = 'compiler'
     if user_compiler:
         if which(user_compiler):
             env[var] = user_compiler
         else:
-            raise SCons.Errors.UserError('The given compiler does not exist. :-(')
+            raise SCons.Errors.UserError('The given {} does not exist. '
+                                         ':-('.format(compiler_string))
     else:
         for c in compilers:
             if which(c):
                 env[var] = c
                 break
         else:
-            raise SCons.Errors.UserError("Couldn't find a viable compiler. "
-                                         "Have you installed one?")
+            raise SCons.Errors.UserError(("Couldn't find a viable {}. "
+                                          "Have you installed one?").format(
+                                              compiler_string))
 
 common_env = Environment()
-set_compiler(common_env, 'CC', CC, ('clang', 'gcc'), 'C')
-set_compiler(common_env, 'CXX', CXX, ('clang++', 'g++'), 'C++')
+set_compiler(common_env, 'CC', CC, ('clang', 'gcc'), 'C compiler')
+set_compiler(common_env, 'CXX', CXX, ('clang++', 'g++'), 'C++ compiler')
+set_compiler(common_env, 'AS', AS, ('gas'), 'assembler')
 common_env.Append(CFLAGS='{} -std=c99'.format(CFLAGS))
 common_env.Append(CXXFLAGS='{} -std=c++11'.format(CFLAGS))
 
