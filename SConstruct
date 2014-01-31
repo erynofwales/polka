@@ -11,6 +11,16 @@
 # DEFAULT CONFIGURATION VALUES
 #
 
+# Settings for the default compiler. Setting these overrides the defaults,
+# provided your compiler exists.
+CC = None
+CXX = None
+AS = None
+
+# Same as above but for default CFLAGS. These are appended to both CFLAGS and
+# CXXFLAGS.
+CFLAGS = '-Wall -Wextra -pedantic'
+
 # Enabling debugging does the following things:
 #   1. Turns on debugging symbols
 #   2. Turns off all optimization
@@ -58,12 +68,26 @@ def get_bool_argument(arg):
     return True
 
 
-cflags='-Wall -Wextra -pedantic'
-common_env = Environment(
-    CC='clang' if which('clang') else 'gcc',
-    CXX='clang++' if which('clang++') else 'g++',
-    CFLAGS=cflags + ' -std=c99',
-    CXXFLAGS=cflags + ' -std=c++11')
+def set_compiler(env, var, user_compiler, compilers, string=None):
+    if user_compiler:
+        if which(user_compiler):
+            env[var] = user_compiler
+        else:
+            raise SCons.Errors.UserError('The given compiler does not exist. :-(')
+    else:
+        for c in compilers:
+            if which(c):
+                env[var] = c
+                break
+        else:
+            raise SCons.Errors.UserError("Couldn't find a viable compiler. "
+                                         "Have you installed one?")
+
+common_env = Environment()
+set_compiler(common_env, 'CC', CC, ('clang', 'gcc'), 'C')
+set_compiler(common_env, 'CXX', CXX, ('clang++', 'g++'), 'C++')
+common_env.Append(CFLAGS='{} -std=c99'.format(CFLAGS))
+common_env.Append(CXXFLAGS='{} -std=c++11'.format(CFLAGS))
 
 BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', BUILD_CMDS))
 if not BUILD_CMDS:
