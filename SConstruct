@@ -112,5 +112,20 @@ release_env.Append(CPPDEFINES=['RELEASE'])
 release_cflags = ' -O2'
 release_env.Append(CFLAGS=release_cflags, CXXFLAGS=release_cflags)
 
-for mode, env in {'debug': debug_env, 'release': release_env}.iteritems():
+modes = {
+    'debug': debug_env,
+    'release': release_env,
+}
+
+mode = ARGUMENTS.get('MODE', None)
+if mode:
+    # If MODE=foo is specified, build only that mode.
+    try:
+        env = modes[mode]
+    except KeyError:
+        raise SCons.Errors.UserError('Invalid mode: {}'.format(mode))
     env.SConscript(os.path.join('build', mode, 'SConscript'), {'env': env})
+else:
+    # Build all modes.
+    for mode, env in {'debug': debug_env, 'release': release_env}.iteritems():
+        env.SConscript(os.path.join('build', mode, 'SConscript'), {'env': env})
