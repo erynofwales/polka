@@ -70,8 +70,8 @@ def get_bool_argument(arg):
 
 
 def set_compiler(env, var, user_compiler, compilers, compiler_string=None):
-    if not string:
-        string = 'compiler'
+    if not compiler_string:
+        compiler_string = 'compiler'
     if user_compiler:
         if which(user_compiler):
             env[var] = user_compiler
