@@ -101,16 +101,20 @@ if not BUILD_CMDS:
 src_dir = Dir('#src')
 
 debug_env = common_env.Clone()
-debug_env.VariantDir(os.path.join('build', 'debug'), src_dir, duplicate=0)
+debug_build_dir = os.path.join('build', 'debug')
+debug_env.VariantDir(debug_build_dir, src_dir, duplicate=0)
 debug_env.Append(CPPDEFINES=['DEBUG'])
 debug_cflags = ' -O0 -g'
 debug_env.Append(CFLAGS=debug_cflags, CXXFLAGS=debug_cflags)
+debug_env.Clean('.', debug_build_dir)
 
 release_env = common_env.Clone()
-release_env.VariantDir(os.path.join('build', 'release'), src_dir, duplicate=0)
+release_build_dir = os.path.join('build', 'release')
+release_env.VariantDir(release_build_dir, src_dir, duplicate=0)
 release_env.Append(CPPDEFINES=['RELEASE'])
 release_cflags = ' -O2'
 release_env.Append(CFLAGS=release_cflags, CXXFLAGS=release_cflags)
+release_env.Clean('.', release_build_dir)
 
 modes = {
     'debug': debug_env,
