@@ -1,0 +1,28 @@
+# SConscript
+# vim: set ft=python:
+#
+# Eryn Wells <eryn@erynwells.me>
+
+import os.path
+
+Import('env')
+
+
+files = [
+    'gtest-all.cc',
+    'gtest-death-test.cc',
+    'gtest-filepath.cc',
+    'gtest-port.cc',
+    'gtest-printers.cc',
+    'gtest-test-part.cc',
+    'gtest-typed-test.cc',
+    'gtest.cc',
+]
+
+objs = []
+for f in files:
+    objs.append(env.Object(f))
+
+env.Append(CPPPATH=[Dir('include').srcnode()])
+
+gtest = env.Library('gtest', objs)
