@@ -87,6 +87,12 @@ set_toolchain_binary(common_env, 'LINK', LINK)
 common_env.Append(CFLAGS='{} -std=c99'.format(CFLAGS))
 common_env.Append(CXXFLAGS='{} -std=c++11'.format(CFLAGS))
 
+# Add color error messages for clang
+if 'clang' in common_env['CC']:
+    common_env.Append(CFLAGS=' -fcolor-diagnostics')
+if 'clang' in common_env['CXX']:
+    common_env.Append(CXXFLAGS=' -fcolor-diagnostics')
+
 BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', BUILD_CMDS))
 if not BUILD_CMDS:
     def generate_comstr(action):
