@@ -90,11 +90,14 @@ common_env.Append(CXXFLAGS='{} -std=c++11'.format(CFLAGS))
 BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', BUILD_CMDS))
 if not BUILD_CMDS:
     def generate_comstr(action):
-        return '{:>18}: $TARGET'.format(action)
+        return '{:>25}: $TARGET'.format(action)
     common_env['ASCOMSTR'] = generate_comstr('Assembling')
     common_env['CCCOMSTR'] = generate_comstr('Building (C)')
+    common_env['SHCCCOMSTR'] = generate_comstr('Building (C, Shared)')
     common_env['CXXCOMSTR'] = generate_comstr('Building (C++)')
+    common_env['SHCXXCOMSTR'] = generate_comstr('Building (C++, Shared)')
     common_env['LINKCOMSTR'] = generate_comstr('Linking')
+    common_env['SHLINKCOMSTR'] = generate_comstr('Linking (Shared)')
     common_env['ARCOMSTR'] = generate_comstr('Archiving')
     common_env['RANLIBCOMSTR'] = generate_comstr('Indexing')
 
