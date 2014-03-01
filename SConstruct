@@ -22,15 +22,6 @@ LINK = None
 # CXXFLAGS.
 CFLAGS = '-Wall -Wextra -pedantic'
 
-# Enabling debugging does the following things:
-#   1. Turns on debugging symbols
-#   2. Turns off all optimization
-#   3. Sets the DEBUG define
-DEBUG = True
-
-# Show build commands ("cc [args] -o [out] [file]", etc). If this is False, show
-# some nice messages for each step of the build.
-BUILD_CMDS = False
 
 #
 # BUILD STUFF BELOW HERE
@@ -93,44 +84,58 @@ if 'clang' in common_env['CC']:
 if 'clang' in common_env['CXX']:
     common_env.Append(CXXFLAGS=' -fcolor-diagnostics')
 
-BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', BUILD_CMDS))
+BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', False))
 if not BUILD_CMDS:
     def generate_comstr(action):
         return '{:>25}: $TARGET'.format(action)
-    common_env['ASCOMSTR'] = generate_comstr('Assembling')
-    common_env['CCCOMSTR'] = generate_comstr('Building (C)')
-    common_env['SHCCCOMSTR'] = generate_comstr('Building (C, Shared)')
-    common_env['CXXCOMSTR'] = generate_comstr('Building (C++)')
-    common_env['SHCXXCOMSTR'] = generate_comstr('Building (C++, Shared)')
-    common_env['LINKCOMSTR'] = generate_comstr('Linking')
-    common_env['SHLINKCOMSTR'] = generate_comstr('Linking (Shared)')
     common_env['ARCOMSTR'] = generate_comstr('Archiving')
+    common_env['ASCOMSTR'] = generate_comstr('Assembling')
+    common_env['ASPPCOMSTR'] = generate_comstr('Assembling')
+    common_env['CCCOMSTR'] = generate_comstr('Building (C)')
+    common_env['CXXCOMSTR'] = generate_comstr('Building (C++)')
+    common_env['LINKCOMSTR'] = generate_comstr('Linking')
     common_env['RANLIBCOMSTR'] = generate_comstr('Indexing')
+    common_env['SHCCCOMSTR'] = generate_comstr('Building (C, Shared)')
+    common_env['SHCXXCOMSTR'] = generate_comstr('Building (C++, Shared)')
+    common_env['SHLINKCOMSTR'] = generate_comstr('Linking (Shared)')
 
+build_dir = Dir('#build')
+lib_dir = Dir('#lib')
 src_dir = Dir('#src')
+test_dir = Dir('#test')
 
 
-def create_env(variant_dir, appends=None):
+def create_env(name, src_dirs, appends=None):
+    output_dir = build_dir.Dir(name)
     env = common_env.Clone()
-    env.VariantDir(variant_dir, src_dir, duplicate=0)
-    env.Clean('.', variant_dir)
-    for k, v in appends.iteritems():
-        if k.startswith('='):
-            env[k[1:]] = v
-        else:
-            env.Append(**{k: v})
+    env['__name'] = name
+    env['__build_dir'] = output_dir
+    env['__src_dirs'] = []
+    env['__output_dirs'] = []
+    for d in src_dirs:
+        out_dir = output_dir.Dir(d.path)
+        env['__src_dirs'].append(d)
+        env['__output_dirs'].append(out_dir)
+        env.VariantDir(out_dir, d.path, duplicate=0)
+        env.Clean('.', out_dir)
+    if appends:
+        for k, v in appends.iteritems():
+            if k.startswith('='):
+                env[k[1:]] = v
+            else:
+                env.Append(**{k: v})
     return env
 
 
 debug_cflags = ' -O0 -g'
-debug_env = create_env(os.path.join('build', 'debug'), {
+debug_env = create_env('debug', [src_dir], {
     'CPPDEFINES': ['DEBUG'],
     'CFLAGS': debug_cflags,
     'CXXFLAGS': debug_cflags,
 })
 
 release_cflags = ' -O2'
-release_env = create_env(os.path.join('build', 'release'), {
+release_env = create_env('release', [src_dir], {
     'CPPDEFINES': ['RELEASE'],
     'CFLAGS': release_cflags,
     'CXXFLAGS': release_cflags,
@@ -142,14 +147,17 @@ modes = {
 }
 
 mode = ARGUMENTS.get('MODE', None)
+build_modes = []
 if mode:
     # If MODE=foo is specified, build only that mode.
+    build_modes.append(mode)
+else:
+    build_modes = modes.keys()
+
+for mode in build_modes:
     try:
         env = modes[mode]
     except KeyError:
-        raise SCons.Errors.UserError('Invalid mode: {}'.format(mode))
-    env.SConscript(os.path.join('build', mode, 'SConscript'), {'env': env})
-else:
-    # Build all modes.
-    for mode, env in modes.iteritems():
-        env.SConscript(os.path.join('build', mode, 'SConscript'), {'env': env})
+        print 'Skipping invalid mode: {}'.format(mode)
+    for d in env['__output_dirs']:
+        env.SConscript(d.File('SConscript'), {'env': env})
