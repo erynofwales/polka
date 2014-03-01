@@ -132,7 +132,7 @@
 // prevent a user from accidentally including gtest-internal-inl.h in
 // his code.
 #define GTEST_IMPLEMENTATION_ 1
-#include "src/gtest-internal-inl.h"
+#include "gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
 #if GTEST_OS_WINDOWS
@@ -366,8 +366,13 @@ void AssertHelper::operator=(const Message& message) const {
                       );  // NOLINT
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+
 // Mutex for linked pointers.
 GTEST_API_ GTEST_DEFINE_STATIC_MUTEX_(g_linked_ptr_mutex);
+
+#pragma clang diagnostic pop
 
 // Application pathname gotten in InitGoogleTest.
 std::string g_executable_path;

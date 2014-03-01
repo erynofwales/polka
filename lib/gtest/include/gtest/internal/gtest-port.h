@@ -1380,6 +1380,9 @@ class MutexBase {
 # define GTEST_DECLARE_STATIC_MUTEX_(mutex) \
     extern ::testing::internal::MutexBase mutex
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+
 // Defines and statically (i.e. at link time) initializes a static mutex.
 // The initialization list here does not explicitly initialize each field,
 // instead relying on default initialization for the unspecified fields. In
@@ -1388,6 +1391,8 @@ class MutexBase {
 // The flag -Wmissing-field-initializers must not be specified for this to work.
 # define GTEST_DEFINE_STATIC_MUTEX_(mutex) \
     ::testing::internal::MutexBase mutex = { PTHREAD_MUTEX_INITIALIZER, false }
+
+#pragma clang diagnostic pop
 
 // The Mutex class can only be used for mutexes created at runtime. It
 // shares its API with MutexBase otherwise.
