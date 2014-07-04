@@ -75,8 +75,8 @@ set_toolchain_binary(common_env, 'CXX', CXX, ('clang++', 'g++'))
 set_toolchain_binary(common_env, 'AS', AS)
 set_toolchain_binary(common_env, 'LINK', LINK)
 
-BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', False))
-if not BUILD_CMDS:
+
+def verbose_build_cmds():
     def generate_comstr(action):
         return '{:>25}: $TARGET'.format(action)
     common_env['ARCOMSTR'] = generate_comstr('Archiving')
@@ -89,6 +89,26 @@ if not BUILD_CMDS:
     common_env['SHCCCOMSTR'] = generate_comstr('Building (C, Shared)')
     common_env['SHCXXCOMSTR'] = generate_comstr('Building (C++, Shared)')
     common_env['SHLINKCOMSTR'] = generate_comstr('Linking (Shared)')
+
+
+def succinct_build_cmds():
+    def generate_comstr(action):
+        return '  [{:^6}] $TARGET'.format(action)
+    common_env['ARCOMSTR'] = generate_comstr('AR')
+    common_env['ASCOMSTR'] = generate_comstr('AS')
+    common_env['ASPPCOMSTR'] = generate_comstr('AS')
+    common_env['CCCOMSTR'] = generate_comstr('CC')
+    common_env['CXXCOMSTR'] = generate_comstr('CXX')
+    common_env['LINKCOMSTR'] = generate_comstr('LINK')
+    common_env['RANLIBCOMSTR'] = generate_comstr('RANLIB')
+    common_env['SHCCCOMSTR'] = generate_comstr('SHCC')
+    common_env['SHCXXCOMSTR'] = generate_comstr('SHCXX')
+    common_env['SHLINKCOMSTR'] = generate_comstr('SHLINK')
+
+
+BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', False))
+if not BUILD_CMDS:
+    verbose_build_cmds()
 
 # Separate environment for building libraries because they often don't use the
 # same CCFLAGS I do.
