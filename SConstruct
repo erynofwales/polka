@@ -148,6 +148,9 @@ def create_env(name, appends=None):
 def do_sconscript(env, build_env, src_dir, out_dir):
     sconscript = src_dir.File('SConscript')
     print 'Reading {}'.format(sconscript)
+    # Swapping env and build_env here is a bit wacky. Doing so means that env is
+    # always the Environment that the SConscript should be building with, while
+    # build_env is the Environment we're using to put everything together.
     env.SConscript(sconscript,
                    {'env': build_env, 'build_env': env},
                    variant_dir=out_dir)
