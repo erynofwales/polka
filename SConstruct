@@ -16,11 +16,9 @@
 CC = None
 CXX = None
 AS = None
-LINK = None
+LINK = 'clang++'
 
-# Same as above but for default CFLAGS. These are appended to both CFLAGS and
-# CXXFLAGS.
-CFLAGS = '-Wall -Wextra -pedantic'
+CCFLAGS = ['-Wall', '-Wextra', '-pedantic']
 
 
 #
@@ -29,6 +27,7 @@ CFLAGS = '-Wall -Wextra -pedantic'
 
 import os
 import os.path
+import sys
 import SCons.Errors
 
 
@@ -75,17 +74,9 @@ set_toolchain_binary(common_env, 'CC', CC, ('clang', 'gcc'))
 set_toolchain_binary(common_env, 'CXX', CXX, ('clang++', 'g++'))
 set_toolchain_binary(common_env, 'AS', AS)
 set_toolchain_binary(common_env, 'LINK', LINK)
-common_env.Append(CFLAGS='{} -std=c99'.format(CFLAGS))
-common_env.Append(CXXFLAGS='{} -std=c++11'.format(CFLAGS))
 
-# Add color error messages for clang
-if 'clang' in common_env['CC']:
-    common_env.Append(CFLAGS=' -fcolor-diagnostics')
-if 'clang' in common_env['CXX']:
-    common_env.Append(CXXFLAGS=' -fcolor-diagnostics')
 
-BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', False))
-if not BUILD_CMDS:
+def verbose_build_cmds():
     def generate_comstr(action):
         return '{:>25}: $TARGET'.format(action)
     common_env['ARCOMSTR'] = generate_comstr('Archiving')
@@ -99,25 +90,52 @@ if not BUILD_CMDS:
     common_env['SHCXXCOMSTR'] = generate_comstr('Building (C++, Shared)')
     common_env['SHLINKCOMSTR'] = generate_comstr('Linking (Shared)')
 
-build_dir = Dir('#build')
-lib_dir = Dir('#lib')
-src_dir = Dir('#src')
-test_dir = Dir('#test')
+
+def succinct_build_cmds():
+    def generate_comstr(action):
+        return '  [{:^6}] $TARGET'.format(action)
+    common_env['ARCOMSTR'] = generate_comstr('AR')
+    common_env['ASCOMSTR'] = generate_comstr('AS')
+    common_env['ASPPCOMSTR'] = generate_comstr('AS')
+    common_env['CCCOMSTR'] = generate_comstr('CC')
+    common_env['CXXCOMSTR'] = generate_comstr('CXX')
+    common_env['LINKCOMSTR'] = generate_comstr('LINK')
+    common_env['RANLIBCOMSTR'] = generate_comstr('RANLIB')
+    common_env['SHCCCOMSTR'] = generate_comstr('SHCC')
+    common_env['SHCXXCOMSTR'] = generate_comstr('SHCXX')
+    common_env['SHLINKCOMSTR'] = generate_comstr('SHLINK')
 
 
-def create_env(name, src_dirs, appends=None):
-    output_dir = build_dir.Dir(name)
+BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', False))
+if not BUILD_CMDS:
+    verbose_build_cmds()
+
+# Separate environment for building libraries because they often don't use the
+# same CCFLAGS I do.
+lib_env = common_env.Clone()
+
+common_env.Append(CCFLAGS=CCFLAGS)
+common_env.Append(CFLAGS=['-std=c99'])
+common_env.Append(CXXFLAGS=['-std=c++11'])
+
+# Add color error messages for clang
+if sys.stdout.isatty():
+    if 'clang' in common_env['CC'] or 'clang' in common_env['CXX']:
+        common_env.Append(CCFLAGS=['-fcolor-diagnostics'])
+
+BUILD_DIR = Dir('#build')
+LIB_DIR = Dir('#lib')
+SRC_DIR = Dir('#src')
+TEST_DIR = Dir('#test')
+
+
+def create_env(name, appends=None):
+    output_dir = BUILD_DIR.Dir(name)
     env = common_env.Clone()
+    # Standard env extensions.
+    env.Append(CPPPATH=[SRC_DIR])
+    # Custom env stuff.
     env['__name'] = name
-    env['__build_dir'] = output_dir
-    env['__src_dirs'] = []
-    env['__output_dirs'] = []
-    for d in src_dirs:
-        out_dir = output_dir.Dir(d.path)
-        env['__src_dirs'].append(d)
-        env['__output_dirs'].append(out_dir)
-        env.VariantDir(out_dir, d.path, duplicate=0)
-        env.Clean('.', out_dir)
     if appends:
         for k, v in appends.iteritems():
             if k.startswith('='):
@@ -127,22 +145,33 @@ def create_env(name, src_dirs, appends=None):
     return env
 
 
-debug_cflags = ' -O0 -g'
-debug_env = create_env('debug', [src_dir], {
-    'CPPDEFINES': ['DEBUG'],
-    'CFLAGS': debug_cflags,
-    'CXXFLAGS': debug_cflags,
+def do_sconscript(env, build_env, src_dir, out_dir):
+    sconscript = src_dir.File('SConscript')
+    print 'Reading {}'.format(sconscript)
+    env.SConscript(sconscript,
+                   {'env': build_env},
+                   variant_dir=out_dir)
+
+
+debug_env = create_env('debug', {
+    'CPPDEFINES': ['NDEBUG'],
+    'CCFLAGS': ['-O0', '-g'],
 })
 
-release_cflags = ' -O2'
-release_env = create_env('release', [src_dir], {
-    'CPPDEFINES': ['RELEASE'],
-    'CFLAGS': release_cflags,
-    'CXXFLAGS': release_cflags,
+beta_env = create_env('beta', {
+    'CPPDEFINES': ['NDEBUG'],
+    'CCFLAGS': ['-O3', '-g'],
 })
+
+release_env = create_env('release', {
+    'CPPDEFINES': ['NRELEASE'],
+    'CCFLAGS': ['-O2']
+})
+
 
 modes = {
     'debug': debug_env,
+    'beta': beta_env,
     'release': release_env,
 }
 
@@ -152,12 +181,29 @@ if mode:
     # If MODE=foo is specified, build only that mode.
     build_modes.append(mode)
 else:
-    build_modes = modes.keys()
+    build_modes = ['debug']
 
 for mode in build_modes:
     try:
         env = modes[mode]
     except KeyError:
         print 'Skipping invalid mode: {}'.format(mode)
-    for d in env['__output_dirs']:
-        env.SConscript(d.File('SConscript'), {'env': env})
+        break
+
+    out_dir = BUILD_DIR.Dir(env['__name'])
+
+    # Process all lib dirs.
+    for lib in os.listdir(LIB_DIR.abspath):
+        lib_out_dir = out_dir.Dir('lib').Dir(lib)
+        if not os.path.isdir(lib_out_dir.abspath):
+            continue
+        do_sconscript(env, lib_env, LIB_DIR.Dir(lib), lib_out_dir)
+        env.Append(LIBPATH=[lib_out_dir])
+
+    # Get source files.
+    src_out_dir = out_dir.Dir('src')
+    do_sconscript(env, env, SRC_DIR, src_out_dir)
+    env.Append(LIBPATH=[src_out_dir])
+
+    # Get test binaries.
+    do_sconscript(env, env, TEST_DIR, out_dir.Dir('test'))
