@@ -149,7 +149,7 @@ def do_sconscript(env, build_env, src_dir, out_dir):
     sconscript = src_dir.File('SConscript')
     print 'Reading {}'.format(sconscript)
     env.SConscript(sconscript,
-                   {'env': build_env},
+                   {'env': build_env, 'build_env': env},
                    variant_dir=out_dir)
 
 
