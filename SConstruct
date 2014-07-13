@@ -195,8 +195,6 @@ for mode in build_modes:
     # Process all lib dirs.
     for lib in os.listdir(LIB_DIR.abspath):
         lib_out_dir = out_dir.Dir('lib').Dir(lib)
-        if not os.path.isdir(lib_out_dir.abspath):
-            continue
         do_sconscript(env, lib_env, LIB_DIR.Dir(lib), lib_out_dir)
         env.Append(LIBPATH=[lib_out_dir])
 
