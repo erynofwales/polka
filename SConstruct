@@ -165,7 +165,7 @@ beta_env = create_env('beta', {
 
 release_env = create_env('release', {
     'CPPDEFINES': ['NRELEASE'],
-    'CCFLAGS': ['-O2']
+    'CCFLAGS': ['-O3']
 })
 
 
