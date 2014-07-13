@@ -158,6 +158,11 @@ debug_env = create_env('debug', {
     'CCFLAGS': ['-O0', '-g'],
 })
 
+beta_env = create_env('beta', {
+    'CPPDEFINES': ['NDEBUG'],
+    'CCFLAGS': ['-O3', '-g'],
+})
+
 release_env = create_env('release', {
     'CPPDEFINES': ['NRELEASE'],
     'CCFLAGS': ['-O2']
@@ -166,6 +171,7 @@ release_env = create_env('release', {
 
 modes = {
     'debug': debug_env,
+    'beta': beta_env,
     'release': release_env,
 }
 
