@@ -6,6 +6,7 @@
 import os.path
 
 Import('env')
+Import('build_env')
 
 
 files = [
@@ -23,6 +24,8 @@ objs = []
 for f in files:
     objs.append(env.Object(f))
 
-env.Append(CPPPATH=[Dir('include').srcnode()])
+include_dir = Dir('include').srcnode()
+env.Append(CPPPATH=[include_dir])
+build_env.Append(CPPPATH=[include_dir])
 
 gtest = env.Library('gtest', objs)
