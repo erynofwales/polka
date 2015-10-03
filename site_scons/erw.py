@@ -17,14 +17,16 @@ class Environment(SCons.Environment.Environment):
     '''
 
     def __init__(self, name, modern=True, paranoid=True, colorful=True, succinct=True, **kwargs):
-        # Use clang if its available.
-        kwargs.setdefault('CC', self._toolchain_binary(('clang', 'gcc')))
-        kwargs.setdefault('CXX', self._toolchain_binary(('clang++', 'g++')))
-        kwargs.setdefault('LINK', self._toolchain_binary(('clang++')))
-
         super(Environment, self).__init__(**kwargs)
 
         self['NAME'] = name
+
+        if 'CC' not in kwargs:
+            self['CC'] = self.Detect(['clang', 'gcc'])
+        if 'CXX' not in kwargs:
+            self['CXX'] = self.Detect(['clang++', 'g++'])
+        if 'LINK' not in kwargs:
+            self['LINK'] = self.Detect(['clang++', 'clang', 'ld'])
 
         # Modern C/C++
         if modern:
@@ -50,11 +52,6 @@ class Environment(SCons.Environment.Environment):
         self['SHCCCOMSTR'] = self._comstr('Building (C, Shared)', succinct)
         self['SHCXXCOMSTR'] = self._comstr('Building (C++, Shared)', succinct)
         self['SHLINKCOMSTR'] = self._comstr('Linking (Shared)', succinct)
-
-    def _toolchain_binary(self, binaries):
-        for b in binaries:
-            if b and paths.which(b):
-                return b
 
     def _comstr(self, action, succinct=True):
         if succinct:
