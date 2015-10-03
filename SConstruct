@@ -54,7 +54,8 @@ for mode in (MODE.split(',') if MODE else ['debug']):
     # Get source files.
     src_out_dir = out_dir.Dir('src')
     do_sconscript(env, SRC_DIR, src_out_dir)
-    env.Append(LIBPATH=[src_out_dir])
+    env.Append(LIBPATH=[src_out_dir],
+               CPPPATH=[SRC_DIR])
 
     # Get test binaries.
     do_sconscript(env, TEST_DIR, out_dir.Dir('test'))
