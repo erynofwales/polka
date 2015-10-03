@@ -39,9 +39,17 @@ for mode in (MODE.split(',') if MODE else ['debug']):
     env.Append(CPPPATH=['.'])
 
     # Process all lib dirs.
+    env['AVAILABLE_LIBS'] = {}
     for lib in os.listdir(LIB_DIR.abspath):
+        lib_dir = LIB_DIR.Dir(lib)
+        if not lib_dir.isdir():
+            print 'Skipping {} in lib directory: is not a directory'.format(lib)
+            continue
         lib_out_dir = out_dir.Dir('lib').Dir(lib)
-        do_sconscript(env, LIB_DIR.Dir(lib), lib_out_dir)
+        output = do_sconscript(env, LIB_DIR.Dir(lib), lib_out_dir)
+        if not output:
+            print "Lib {} didn't return any object".format(lib)
+        env['AVAILABLE_LIBS'][lib] = output
         env.Append(LIBPATH=[lib_out_dir])
 
     # Get source files.
