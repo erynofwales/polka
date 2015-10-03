@@ -11,6 +11,9 @@ import os
 import erw
 
 
+BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', False))
+MODE = ARGUMENTS.get('MODE', None)
+
 BUILD_DIR = Dir('#build')
 LIB_DIR = Dir('#lib')
 SRC_DIR = Dir('#src')
@@ -26,9 +29,6 @@ def do_sconscript(env, src_dir, out_dir):
     env.SConscript(sconscript,
                    {'env': env.Clone(), 'build_env': env},
                    variant_dir=out_dir)
-
-BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', False))
-MODE = ARGUMENTS.get('MODE', None)
 
 modes = {
     'debug': erw.DebugEnvironment(succinct=not BUILD_CMDS),
