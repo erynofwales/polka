@@ -33,7 +33,7 @@ for mode in (MODE.split(',') if MODE else ['debug']):
         print 'Skipping invalid mode: {}'.format(mode)
         break
 
-    out_dir = BUILD_DIR.Dir(env['_name'])
+    out_dir = BUILD_DIR.Dir(env['NAME'])
 
     # Allow same directory includes.
     env.Append(CPPPATH=['.'])

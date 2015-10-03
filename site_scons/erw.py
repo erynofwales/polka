@@ -24,7 +24,7 @@ class Environment(SCons.Environment.Environment):
 
         super(Environment, self).__init__(**kwargs)
 
-        self['_name'] = name
+        self['NAME'] = name
 
         # Modern C/C++
         if modern:
