@@ -1,7 +1,14 @@
 # site_init.py
 # Eryn Wells <eryn@erynwells.me>
 
-import erw
+
+def do_sconscript(env, src_dir, out_dir):
+    '''
+    Look for a SConscript file in `src_dir` and run it. Return any result.
+    '''
+    sconscript = src_dir.File('SConscript')
+    print 'Reading {}'.format(sconscript)
+    return env.SConscript(sconscript, {'env': env}, variant_dir=out_dir)
 
 #
 # Argument utils
