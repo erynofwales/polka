@@ -35,6 +35,9 @@ for mode in (MODE.split(',') if MODE else ['debug']):
 
     out_dir = BUILD_DIR.Dir(env['_name'])
 
+    # Allow same directory includes.
+    env.Append(CPPPATH=['.'])
+
     # Process all lib dirs.
     for lib in os.listdir(LIB_DIR.abspath):
         lib_out_dir = out_dir.Dir('lib').Dir(lib)
