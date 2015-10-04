@@ -60,5 +60,5 @@ for mode in (MODE.split(',') if MODE else ['debug']):
 
     # Get test binaries.
     test = do_sconscript(env, TEST_DIR, out_dir.Dir('test'))
-    run_tests = env.Alias('test', [test], test[0].path)
+    run_tests = env.Alias('test', [test], '{} --gtest_color=yes'.format(test[0].path))
     env.AlwaysBuild(run_tests)
