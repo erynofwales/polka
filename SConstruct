@@ -59,4 +59,6 @@ for mode in (MODE.split(',') if MODE else ['debug']):
                CPPPATH=[SRC_DIR])
 
     # Get test binaries.
-    do_sconscript(env, TEST_DIR, out_dir.Dir('test'))
+    test = do_sconscript(env, TEST_DIR, out_dir.Dir('test'))
+    run_tests = env.Alias('test', [test], test[0].path)
+    env.AlwaysBuild(run_tests)

@@ -26,4 +26,5 @@ for f in files:
     objs.append(env.Object(f))
 
 # TODO: Add the library target for the package to test to LIBS.
-env.Program('test', objs, LIBS=['gtest'])
+test = env.Program('test', objs, LIBS=['gtest'])
+Return('test')
