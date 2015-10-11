@@ -63,19 +63,19 @@ class Environment(SCons.Environment.Environment):
 class DebugEnvironment(Environment):
     def __init__(self, name='debug', **kwargs):
         super(DebugEnvironment, self).__init__(name, **kwargs)
-        self.Append(CPPDEFINES=['NDEBUG'])
+        self.Append(CPPDEFINES=['DEBUG'])
         self.Append(CCFLAGS=['-O0', '-g'])
 
 
 class BetaEnvironment(Environment):
     def __init__(self, name='beta', **kwargs):
         super(BetaEnvironment, self).__init__(name, **kwargs)
-        self.Append(CPPDEFINES=['NDEBUG'])
+        self.Append(CPPDEFINES=['DEBUG'])
         self.Append(CCFLAGS=['-O3', '-g'])
 
 
 class ReleaseEnvironment(Environment):
     def __init__(self, name='release', **kwargs):
         super(ReleaseEnvironment, self).__init__(name, **kwargs)
-        self.Append(CPPDEFINES=['NRELEASE'])
+        self.Append(CPPDEFINES=['NDEBUG', 'RELEASE'])
         self.Append(CCFLAGS=['-O3'])
