@@ -16,7 +16,7 @@ def _register_program(env, name, program):
 def _build_program(env):
     original_builder = env.Program
 
-    def builder(env, program, sources, local_libs=None, *args, **kwargs):
+    def builder(env, name, sources, local_libs=None, *args, **kwargs):
         # local_libs is an array of names of libs built in the local project.
         # These will be looked up in the environment and added to the LIBS
         # array, if present.
@@ -26,8 +26,8 @@ def _build_program(env):
 #                kwargs['LIBS'].extend(local_libs)
 #            except KeyError:
 #                kwargs['LIBS'] = local_libs
-        prog = original_builder(program, sources, *args, **kwargs)
-        register_program(prog)
+        prog = original_builder(name, sources, *args, **kwargs)
+        _register_program(env, name, prog)
         return prog
 
     return builder
