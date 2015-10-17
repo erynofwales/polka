@@ -12,13 +12,13 @@ import SCons.Script
 
 
 def _lib(env, name):
-    return env['LIBS'].get(name)
+    return env['LOCAL_LIBS'].get(name)
 
 
 def _register_lib(env, name, lib):
-    if name in env['LIBS']:
+    if name in env['LOCAL_LIBS']:
         env.log_error('Library has already been built: {}'.format(name))
-    env['LIBS'][name] = lib
+    env['LOCAL_LIBS'][name] = lib
 
 
 def _lib_dirs(env):
@@ -69,7 +69,7 @@ def _build_library(env, lib_func):
 #
 
 def generate(env):
-    env.SetDefault(LIBS={})
+    env.SetDefault(LOCAL_LIBS={})
     env.AddMethod(_process_lib_dir, 'LibDir')
     env.AddMethod(_build_library(env, env.Library), 'Library')
     env.AddMethod(_build_library(env, env.StaticLibrary), 'StaticLibrary')
