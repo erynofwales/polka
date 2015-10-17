@@ -154,10 +154,6 @@ class Environment(SCons.Environment.Environment):
                 continue
             yield (lib, lib_dir)
 
-    #
-    # Library processing
-    #
-
     def process_lib_dirs(self):
         self.log('Processing libs in #{} ...'.format(self.lib_root.path))
         for name, lib in self.lib_dirs:
@@ -169,14 +165,6 @@ class Environment(SCons.Environment.Environment):
         # TODO: Do the thing.
         # do_sconscript(env, env.source_root, src_out_dir)
         self.Append(CPPPATH=[self.src_root])
-
-    def lib(self, name):
-        return self['LIBS'].get(name)
-
-    def register_lib(self, name, lib):
-        if name in self['LIBS']:
-            self.log_error('Library has already been built: {}'.format(name))
-        self['LIBS'][name] = lib
 
     #
     # Test processing

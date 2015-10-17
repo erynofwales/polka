@@ -8,6 +8,15 @@ SCons builder for a lib directory.
 import SCons.Errors
 import SCons.Script
 
+def _lib(env, name):
+    return env['LIBS'].get(name)
+
+
+def _register_lib(env, name, lib):
+    if name in env['LIBS']:
+        env.log_error('Library has already been built: {}'.format(name))
+    env['LIBS'][name] = lib
+
 
 def _process_lib_dir(env, lib, src_dir=None, out_dir=None, inc_dir=None):
     if not src_dir:
@@ -39,7 +48,7 @@ def _build_library(env, lib_func):
 
     def builder(env, lib_name, sources, *args, **kwargs):
         lib = original_builder(lib_name, sources, *args, **kwargs)
-        env.register_lib(lib_name, lib)
+        _register_lib(env, lib_name, lib)
         return lib
 
     return builder
@@ -54,6 +63,7 @@ def generate(env):
     env.AddMethod(_build_library(env, env.Library), 'Library')
     env.AddMethod(_build_library(env, env.StaticLibrary), 'StaticLibrary')
     env.AddMethod(_build_library(env, env.SharedLibrary), 'SharedLibrary')
+    env.AddMethod(_lib, 'lib')
 
 def exists(env):
     return True
