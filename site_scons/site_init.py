@@ -2,7 +2,6 @@
 # Eryn Wells <eryn@erynwells.me>
 
 import logging
-import os
 import sys
 
 import SCons.Environment
@@ -145,20 +144,6 @@ class Environment(SCons.Environment.Environment):
     def src_root(self):
         '''Return the main source root directory for this environment.'''
         return self['SRC_ROOT']
-
-    @property
-    def lib_dirs(self):
-        for lib in os.listdir(self['LIB_ROOT'].abspath):
-            lib_dir = self['LIB_ROOT'].Dir(lib)
-            if not lib_dir.isdir():
-                continue
-            yield (lib, lib_dir)
-
-    def process_lib_dirs(self):
-        self.log('Processing libs in #{} ...'.format(self.lib_root.path))
-        for name, lib in self.lib_dirs:
-            self.log('  - {}'.format(name))
-            self.LibDir(name)
 
     def process_src(self):
         out_dir = self.build_root.Dir('src')

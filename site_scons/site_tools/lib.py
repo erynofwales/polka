@@ -5,8 +5,11 @@
 SCons builder for a lib directory.
 '''
 
+import os
+
 import SCons.Errors
 import SCons.Script
+
 
 def _lib(env, name):
     return env['LIBS'].get(name)
@@ -16,6 +19,19 @@ def _register_lib(env, name, lib):
     if name in env['LIBS']:
         env.log_error('Library has already been built: {}'.format(name))
     env['LIBS'][name] = lib
+
+
+def _lib_dirs(env):
+    for lib in os.listdir(env.lib_root.abspath):
+        lib_dir = env.lib_root.Dir(lib)
+        if not lib_dir.isdir():
+            continue
+        yield (lib, lib_dir)
+
+
+def _process_lib_dirs(env):
+    for name, _ in _lib_dirs(env):
+        env.LibDir(name)
 
 
 def _process_lib_dir(env, lib, src_dir=None, out_dir=None, inc_dir=None):
@@ -64,6 +80,7 @@ def generate(env):
     env.AddMethod(_build_library(env, env.StaticLibrary), 'StaticLibrary')
     env.AddMethod(_build_library(env, env.SharedLibrary), 'SharedLibrary')
     env.AddMethod(_lib, 'lib')
+    env.AddMethod(_process_lib_dirs, 'process_lib_dirs')
 
 def exists(env):
     return True
