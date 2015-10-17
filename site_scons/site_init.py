@@ -1,6 +1,14 @@
 # site_init.py
 # Eryn Wells <eryn@erynwells.me>
 
+import logging
+import os
+import sys
+
+import SCons.Environment
+import SCons.Errors
+
+import paths
 
 def do_sconscript(env, src_dir, out_dir=None):
     '''
@@ -12,6 +20,13 @@ def do_sconscript(env, src_dir, out_dir=None):
     if out_dir:
         kwargs['variant_dir'] = out_dir
     return env.SConscript(sconscript, {'env': env}, **kwargs)
+
+
+def setup_logging(level=logging.DEBUG):
+    '''Configure global logging for the SCons system.'''
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.addHandler(logging.StreamHandler())
 
 #
 # Argument utils
@@ -28,3 +43,204 @@ def get_bool_argument(arg):
     except ValueError:
         pass
     return str(arg).lower() != 'false'
+
+#
+# Builders
+#
+
+def program_builder(env):
+    original_builder = env.Program
+    def builder(env, prog_name, sources, *args, **kwargs):
+        return original_builder(prog_name, sources, *args, **kwargs)
+    return builder
+
+#
+# Environments
+#
+
+class Environment(SCons.Environment.Environment):
+    '''
+    Default SCons environment for building things.
+    '''
+
+    @classmethod
+    def _comstr(cls, action, succinct=True):
+        if succinct:
+            return '{:>25}: $TARGET'.format(action)
+        # Use the default *COMSTR.
+        return None
+
+    @classmethod
+    def for_mode(cls, mode, name=None, succinct=True):
+        kwargs = {'succinct': succinct}
+        if name:
+            kwargs['name'] = name
+        mode_lower = mode.lower()
+        if mode_lower == 'debug':
+            return DebugEnvironment(**kwargs)
+        elif mode_lower == 'beta':
+            return BetaEnvironment(**kwargs)
+        elif mode_lower == 'release':
+            return ReleaseEnvironment(**kwargs)
+        raise SCons.Errors.UserError('Invalid mode: {}'.format(mode))
+
+    def __init__(self, name, modern=True, paranoid=True, colorful=True, succinct=True, **kwargs):
+        super(Environment, self).__init__(**self._append_custom_tools(kwargs))
+
+        self.SetDefault(NAME=name)
+
+        self.SetDefault(LOGGER=logging.getLogger(name))
+
+        self.SetDefault(BUILD_ROOT=self.Dir('#build'))
+        self.SetDefault(LIB_ROOT=self.Dir('#lib'))
+        self.SetDefault(SRC_ROOT=self.Dir('#src'))
+        self.SetDefault(TEST_ROOT=self.Dir('#test'))
+        self.SetDefault(INCLUDE_ROOT=self.Dir('#include'))
+
+        # Allow same directory includes.
+        self.AppendUnique(CPPPATH=['.'])
+
+        self.SetDefault(CC=self.Detect(['clang', 'gcc']))
+        self.SetDefault(CXX=self.Detect(['clang++', 'g++']))
+        self.SetDefault(LINK=self.Detect(['clang++', 'clang', 'ld']))
+
+        # Modern C/C++
+        if modern:
+            self.AppendUnique(CFLAGS=['-std=c99'])
+            self.AppendUnique(CXXFLAGS=['-std=c++11'])
+
+        # Paranoid C/C++
+        if paranoid:
+            self.AppendUnique(CCFLAGS=['-Wall', '-Wextra', '-pedantic'])
+
+        # Colorful C/C++
+        if colorful and sys.stdout.isatty():
+            if 'clang' in self['CC'] or 'clang' in self['CXX']:
+                self.AppendUnique(CCFLAGS=['-fcolor-diagnostics'])
+
+        # Pretty printing
+        self.SetDefault(ARCOMSTR=Environment._comstr('Archiving', succinct))
+        self.SetDefault(ASCOMSTR=Environment._comstr('Assembling', succinct))
+        self.SetDefault(ASPPCOMSTR=Environment._comstr('Assembling', succinct))
+        self.SetDefault(CCCOMSTR=Environment._comstr('Building (C)', succinct))
+        self.SetDefault(CXXCOMSTR=Environment._comstr('Building (C++)', succinct))
+        self.SetDefault(LINKCOMSTR=Environment._comstr('Linking', succinct))
+        self.SetDefault(RANLIBCOMSTR=Environment._comstr('Indexing', succinct))
+        self.SetDefault(SHCCCOMSTR=Environment._comstr('Building (C, Shared)', succinct))
+        self.SetDefault(SHCXXCOMSTR=Environment._comstr('Building (C++, Shared)', succinct))
+        self.SetDefault(SHLINKCOMSTR=Environment._comstr('Linking (Shared)', succinct))
+
+    @property
+    def build_root(self):
+        '''Return the build output directory for this environment.'''
+        return self['BUILD_ROOT'].Dir(self['NAME'])
+
+    @property
+    def lib_root(self):
+        '''Return the root directory for libraries for this environment.'''
+        return self['LIB_ROOT']
+
+    @property
+    def src_root(self):
+        '''Return the main source root directory for this environment.'''
+        return self['SRC_ROOT']
+
+    @property
+    def lib_dirs(self):
+        for lib in os.listdir(self['LIB_ROOT'].abspath):
+            lib_dir = self['LIB_ROOT'].Dir(lib)
+            if not lib_dir.isdir():
+                continue
+            yield (lib, lib_dir)
+
+    #
+    # Library processing
+    #
+
+    def process_lib_dirs(self):
+        self.log('Processing libs in #{} ...'.format(self.lib_root.path))
+        for name, lib in self.lib_dirs:
+            self.log('  - {}'.format(name))
+            self.LibDir(name)
+
+    def process_src(self):
+        out_dir = self.build_root.Dir('src')
+        # TODO: Do the thing.
+        # do_sconscript(env, env.source_root, src_out_dir)
+        self.Append(CPPPATH=[self.src_root])
+
+    def lib(self, name):
+        return self['LIBS'].get(name)
+
+    def register_lib(self, name, lib):
+        if name in self['LIBS']:
+            self.log_error('Library has already been built: {}'.format(name))
+        self['LIBS'][name] = lib
+
+    #
+    # Test processing
+    #
+
+    def test_objects(self, name):
+        self._ensure_test_structure(name)
+        return self['TESTS'][name]['objects']
+
+    def test_program(self, name):
+        self._ensure_test_structure(name)
+        return self['TESTS'][name]['program']
+
+    def register_test_program(self, name, prog):
+        self._ensure_test_structure(name)
+        self['TESTS'][name]['program'] = prog
+
+    def process_tests(self):
+        for test, struct in self['TESTS'].iteritems():
+            if not struct['program']:
+                continue
+            self.TestRun(test)
+
+    def _ensure_test_structure(self, name):
+        self['TESTS'].setdefault(name, {'program': None, 'objects': []})
+
+    #
+    # Logging
+    #
+
+    def log(self, msg, *args, **kwargs):
+        self['LOGGER'].info(msg, *args, **kwargs)
+
+    def log_debug(self, msg, *args, **kwargs):
+        self['LOGGER'].debug(msg, *args, **kwargs)
+
+    def log_error(self, msg, *args, **kwargs):
+        self['LOGGER'].error(msg, *args, **kwargs)
+
+    def _append_custom_tools(self, kwargs):
+        '''Add custom tools to the `kwargs`.'''
+        tools = kwargs.setdefault('tools', ['default'])
+        for tool in ['lib', 'test']:
+            if tool in tools:
+                continue
+            tools.append(tool)
+        return kwargs
+
+
+class DebugEnvironment(Environment):
+    def __init__(self, name='debug', **kwargs):
+        super(DebugEnvironment, self).__init__(name, **kwargs)
+        self.Append(CPPDEFINES=['DEBUG'])
+        self.Append(CCFLAGS=['-O0', '-g'])
+
+
+class BetaEnvironment(Environment):
+    def __init__(self, name='beta', **kwargs):
+        super(BetaEnvironment, self).__init__(name, **kwargs)
+        self.Append(CPPDEFINES=['DEBUG'])
+        self.Append(CCFLAGS=['-O3', '-g'])
+
+
+class ReleaseEnvironment(Environment):
+    def __init__(self, name='release', **kwargs):
+        super(ReleaseEnvironment, self).__init__(name, **kwargs)
+        self.Append(CPPDEFINES=['NDEBUG', 'RELEASE'])
+        self.Append(CCFLAGS=['-O3'])

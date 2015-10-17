@@ -1,18 +1,8 @@
 # SConscript
 # vim: set ft=python:
-#
-# Build file for the gtest library. This file also serves as an example for how
-# to build libraries for inclusion with my SCons environment. Libraries should
-# return a build object.
-#
 # Eryn Wells <eryn@erynwells.me>
 
-import os.path
-
-Import('env')
-env.Append(CPPPATH=[Dir('include').srcnode()])
-
-files = [
+Library('gtest', [
     'gtest-all.cc',
     'gtest-death-test.cc',
     'gtest-filepath.cc',
@@ -21,7 +11,5 @@ files = [
     'gtest-test-part.cc',
     'gtest-typed-test.cc',
     'gtest.cc',
-]
-
-gtest = env.Library('gtest', files)
-Return('gtest')
+    'gtest_main.cc'
+])
