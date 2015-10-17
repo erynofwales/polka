@@ -183,10 +183,12 @@ class Environment(SCons.Environment.Environment):
         self['TESTS'][name]['program'] = prog
 
     def process_tests(self):
+        tests = []
         for test, struct in self['TESTS'].iteritems():
             if not struct['program']:
                 continue
-            self.TestRun(test)
+            tests.append(self.TestRun(test))
+        self.Alias('test', tests)
 
     def _ensure_test_structure(self, name):
         self['TESTS'].setdefault(name, {'program': None, 'objects': []})
