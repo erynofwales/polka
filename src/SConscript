@@ -1,25 +1,5 @@
 # SConscript
 # vim: set ft=python:
-#
 # Eryn Wells <eryn@erynwells.me>
 
-import os.path
-
-Import('env')
-
-
-subdirs = [
-    # TODO: Put subdirectories here.
-]
-
-for d in subdirs:
-    env.SConscript(os.path.join(d, 'SConscript'), {'env': env})
-
-
-files = [
-    # TODO: Put files here.
-]
-
-objs = []
-for f in files:
-    objs.append(env.Object(f))
+Program('hello', ['hello.cc'])
