@@ -10,18 +10,6 @@ import SCons.Errors
 import paths
 
 
-def do_sconscript(env, src_dir, out_dir=None):
-    '''
-    Look for a SConscript file in `src_dir` and run it. Return any result.
-    '''
-    sconscript = src_dir.File('SConscript')
-    print 'Reading {}'.format(sconscript)
-    kwargs = {}
-    if out_dir:
-        kwargs['variant_dir'] = out_dir
-    return env.SConscript(sconscript, {'env': env}, **kwargs)
-
-
 def setup_logging(level=logging.DEBUG):
     '''Configure global logging for the SCons system.'''
     root = logging.getLogger()
