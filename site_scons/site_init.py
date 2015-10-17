@@ -149,6 +149,8 @@ class Environment(SCons.Environment.Environment):
         out_dir = self.build_root.Dir('src')
         # TODO: Do the thing.
         # do_sconscript(env, env.source_root, src_out_dir)
+        self.SConscript(self.src_root.File('SConscript'),
+                        variant_dir=out_dir)
         self.Append(CPPPATH=[self.src_root])
 
     #
@@ -194,7 +196,7 @@ class Environment(SCons.Environment.Environment):
     def _append_custom_tools(self, kwargs):
         '''Add custom tools to the `kwargs`.'''
         tools = kwargs.setdefault('tools', ['default'])
-        for tool in ['lib', 'test']:
+        for tool in ['lib', 'test', 'program', 'sconscript']:
             if tool in tools:
                 continue
             tools.append(tool)

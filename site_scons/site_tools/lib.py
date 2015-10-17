@@ -48,14 +48,9 @@ def _process_lib_dir(env, lib, src_dir=None, out_dir=None, inc_dir=None):
         if include_dir.isdir():
             inc_dir = [include_dir]
     env.Append(CPPPATH=inc_dir)
-    exports = {'Library': env.Library,
-               'StaticLibrary': env.StaticLibrary,
-               'SharedLibrary': env.SharedLibrary}
-    SCons.Script._SConscript.GlobalDict.update(exports)
     out = env.SConscript(src_dir.File('SConscript'),
-                         {'env': env.Clone()},
-                         variant_dir=out_dir,
-                         exports=exports)
+                         clone=True,
+                         variant_dir=out_dir)
     return out
 
 
