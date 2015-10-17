@@ -10,6 +10,7 @@ import SCons.Errors
 
 import paths
 
+
 def do_sconscript(env, src_dir, out_dir=None):
     '''
     Look for a SConscript file in `src_dir` and run it. Return any result.
@@ -100,9 +101,9 @@ class Environment(SCons.Environment.Environment):
         # Allow same directory includes.
         self.AppendUnique(CPPPATH=['.'])
 
-        self.SetDefault(CC=self.Detect(['clang', 'gcc']))
-        self.SetDefault(CXX=self.Detect(['clang++', 'g++']))
-        self.SetDefault(LINK=self.Detect(['clang++', 'clang', 'ld']))
+        self['CC'] = self.Detect(['clang', 'gcc'])
+        self['CXX'] = self.Detect(['clang++', 'g++'])
+        self['LINK'] = self.Detect(['clang++', 'clang', 'ld'])
 
         # Modern C/C++
         if modern:
