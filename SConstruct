@@ -1,10 +1,11 @@
 # SConstruct
 # vim: set ft=python:
-#
-# Toplevel Scons build script. This should be mostly complete and generic enough
-# for most builds.
-#
 # Eryn Wells <eryn@erynwells.me>
+
+'''
+Toplevel Scons build script. This should be mostly complete and generic enough
+for most builds.
+'''
 
 import logging
 
