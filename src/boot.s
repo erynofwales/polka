@@ -20,7 +20,7 @@
 # cause massive harm. Instead, we'll provide our own stack. We will allocate
 # room for a small temporary stack by creating a symbol at the bottom of it,
 # then allocating 16384 bytes for it, and finally creating a symbol at the top.
-.section .bootstrap_stack
+.section .bootstrap_stack, "aw", @nobits
 stack_buttom:
 .skip 16384     # 16 KiB
 stack_top:
@@ -51,8 +51,8 @@ _start:
     # continues execution, just to be safe. We will create a local label rather
     # than real symbol and jump to there endlessly.
     cli
-    hlt
 .Lhang:
+    hlt
     jmp .Lhang
 
 # Set the size of the _start symbol to the current location '.' minus its start.
