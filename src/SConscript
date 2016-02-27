@@ -1,0 +1,5 @@
+# SConscript
+# vim: set ft=python:
+# Eryn Wells <eryn@erynwells.me>
+
+Program('hello', ['hello.cc'])
