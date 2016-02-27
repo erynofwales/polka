@@ -17,7 +17,8 @@ kearly()
 {
     kernel::Console console;
     console.clear(kernel::Console::Color::Blue);
-    console.writeString("Hello world!");
+    console.writeString("Hello world!\n");
+    console.writeString("a\nb\nc\n");
 }
 
 

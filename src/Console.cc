@@ -52,12 +52,22 @@ Console::clear(Console::Color color)
 void
 Console::writeChar(char c)
 {
-    putEntryAt(mCursor.col, mCursor.row, c, mColor);
-    if (++mCursor.col == Console::Width) {
-        mCursor.col = 0;
-        if (++mCursor.row == Console::Height) {
-            mCursor.row = 0;
-        }
+    switch (c) {
+        case '\n':
+            mCursor.col = 0;
+            if (++mCursor.row == Console::Height) {
+                mCursor.row = 0;
+            }
+            break;
+        default:
+            putEntryAt(mCursor.col, mCursor.row, c, mColor);
+            if (++mCursor.col == Console::Width) {
+                mCursor.col = 0;
+                if (++mCursor.row == Console::Height) {
+                    mCursor.row = 0;
+                }
+            }
+            break;
     }
 }
 
