@@ -9,18 +9,14 @@
 #error "This file should be compiled with an ix86-elf compiler!"
 #endif
 
-/**
- * Called very early, before global initialization.
- */
+/** Called very early, before global initialization. */
 extern "C"
 void
 kearly()
 { }
 
 
-/**
- * The beginning of the world...
- */
+/** The beginning of the world... */
 extern "C"
 void
 kmain()
