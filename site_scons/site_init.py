@@ -184,7 +184,7 @@ class Environment(SCons.Environment.Environment):
     def _append_custom_tools(self, kwargs):
         '''Add custom tools to the `kwargs`.'''
         tools = kwargs.setdefault('tools', ['default'])
-        for tool in ['lib', 'test', 'program', 'sconscript']:
+        for tool in ['lib', 'test', 'program', 'sconscript', 'swiftc']:
             if tool in tools:
                 continue
             tools.append(tool)
