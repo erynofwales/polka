@@ -18,8 +18,23 @@ kearly()
     kernel::Console console;
     console.clear(kernel::Console::Color::Blue);
     console.writeString("Hello world!\n");
-    console.writeString("a\nb\nc\n");
-    console.writeString("abc\tdef\tghi\tjkl\tmno\n");
+
+    volatile int foo = 0;
+    int j = 0;
+    int i = 0;
+    for (;;) {
+        if (j == 0) {
+            console.writeString("--- MARK ---\n");
+        }
+        console.writeChar('a' + i);
+        console.writeChar('\n');
+        i = (i + 1) % 26;
+        j = (j + 1) % 500;
+
+        for (uint32_t k = 0; k < (2u << 27) - 1; k++) {
+            foo /= 2;
+        }
+    }
 }
 
 

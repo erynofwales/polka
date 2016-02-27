@@ -44,7 +44,8 @@ struct Console
     Console();
 
     /** Clear the console to the provided color. */
-    void clear(Color color = Color::Black);
+    void clear();
+    void clear(Color color);
 
     /** Write a character to the terminal at the current cursor position. */
     void writeChar(char c);
@@ -60,6 +61,7 @@ private:
     uint8_t mColor;
 
     void putEntryAt(size_t x, size_t y, char c, uint8_t color);
+    void scroll(size_t lines = 1);
 };
 
 } /* namespace kernel */

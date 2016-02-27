@@ -38,9 +38,8 @@ Console::Console()
 
 
 void
-Console::clear(Console::Color color)
+Console::clear()
 {
-    setColor(Color::LightGray, color);
     for (size_t y = 0; y < Console::Height; y++) {
         for (size_t x = 0; x < Console::Width; x++) {
             putEntryAt(x, y, ' ', mColor);
@@ -50,20 +49,30 @@ Console::clear(Console::Color color)
 
 
 void
+Console::clear(Console::Color color)
+{
+    setColor(Color::LightGray, color);
+    clear();
+}
+
+
+void
 Console::writeChar(char c)
 {
     switch (c) {
         case '\n':
             mCursor.col = 0;
-            if (++mCursor.row == Console::Height) {
-                mCursor.row = 0;
+            if (++mCursor.row >= Console::Height) {
+                scroll();
+                mCursor.row = Console::Height - 1;
             }
             break;
         case '\t':
             mCursor.col += 8;
             if (mCursor.col >= Console::Width) {
-                if (++mCursor.row == Console::Height) {
-                    mCursor.row = 0;
+                if (++mCursor.row >= Console::Height) {
+                    scroll();
+                    mCursor.row = Console::Height - 1;
                 }
                 mCursor.col %= Console::Width;
             }
@@ -72,8 +81,9 @@ Console::writeChar(char c)
             putEntryAt(mCursor.col, mCursor.row, c, mColor);
             if (++mCursor.col == Console::Width) {
                 mCursor.col = 0;
-                if (++mCursor.row == Console::Height) {
-                    mCursor.row = 0;
+                if (++mCursor.row >= Console::Height) {
+                    scroll();
+                    mCursor.row = Console::Height - 1;
                 }
             }
             break;
@@ -109,6 +119,29 @@ Console::putEntryAt(size_t x,
 {
     const size_t index = y * Console::Width + x;
     mBase[index] = makeVGAEntry(c, color);
+}
+
+void
+Console::scroll(size_t lines)
+{
+    if (lines == 0) {
+        return;
+    }
+
+    if (lines > Console::Height) {
+        clear();
+        return;
+    }
+
+    uint16_t *dst = mBase;
+    uint16_t *src = mBase + lines * Console::Width;
+    uint16_t *const end = mBase + Console::Width * Console::Height;
+    while (src < end) {
+        *dst++ = *src++;
+    }
+    while (dst < end) {
+        *dst++ = makeVGAEntry(' ', mColor);
+    }
 }
 
 } /* namespace kernel */
