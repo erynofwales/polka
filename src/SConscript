@@ -2,4 +2,37 @@
 # vim: set ft=python:
 # Eryn Wells <eryn@erynwells.me>
 
-Program('hello', ['hello.cc'])
+files = [
+    'boot.s',
+    'crti.s',
+    'crtn.s',
+    'main.cc',
+]
+
+Replace(AS='i686-elf-as',
+        CC='clang',
+        CXX='clang++',
+        LINK='i686-elf-ld')
+Append(CFLAGS='-std=gnu99',
+       CCFLAGS='-target i686-pc-elf -ffreestanding',
+       CXXFLAGS='-std=gnu++11 -fno-exceptions -fno-rtti',
+       LINKFLAGS='-nostdlib')
+
+linker_script = File('linker.ld')
+
+kernel = Program('polka.bin', files, LINKFLAGS='-T {}'.format(linker_script.path))
+Depends(kernel, linker_script)
+Alias('kernel', kernel)
+
+img_dir = Dir('img')
+grub_cfg = File('grub.cfg')
+image_dir = Command(img_dir, kernel, [
+    Mkdir(img_dir.Dir('boot/grub')),
+    Copy(img_dir.File('boot/${SOURCE.file}'), '$SOURCE'),
+    Copy(img_dir.Dir('boot/grub'), grub_cfg)
+])
+Clean(image_dir, img_dir)
+image = Command('polka.img', image_dir, [
+    'grub-mkrescue -o $TARGET $SOURCE',
+])
+Alias('image', image)
