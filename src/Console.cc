@@ -59,6 +59,15 @@ Console::writeChar(char c)
                 mCursor.row = 0;
             }
             break;
+        case '\t':
+            mCursor.col += 8;
+            if (mCursor.col >= Console::Width) {
+                if (++mCursor.row == Console::Height) {
+                    mCursor.row = 0;
+                }
+                mCursor.col %= Console::Width;
+            }
+            break;
         default:
             putEntryAt(mCursor.col, mCursor.row, c, mColor);
             if (++mCursor.col == Console::Width) {

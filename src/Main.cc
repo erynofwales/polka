@@ -19,6 +19,7 @@ kearly()
     console.clear(kernel::Console::Color::Blue);
     console.writeString("Hello world!\n");
     console.writeString("a\nb\nc\n");
+    console.writeString("abc\tdef\tghi\tjkl\tmno\n");
 }
 
 
