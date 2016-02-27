@@ -9,7 +9,7 @@ files = [
     'boot.s',
     'crti.s',
     'crtn.s',
-    'main.cc',
+    'Main.cc',
     'Console.cc'
 ]
 

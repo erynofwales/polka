@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include "Console.hh"
 
 #if defined(__linux__)
 #error "This file should be compiled with a cross-compiler, not the Linux system compiler!"
@@ -13,7 +14,11 @@
 extern "C"
 void
 kearly()
-{ }
+{
+    kernel::Console console;
+    console.clear(kernel::Console::Color::Blue);
+    console.writeString("Hello world!");
+}
 
 
 /** The beginning of the world... */

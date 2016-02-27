@@ -32,20 +32,64 @@ makeVGAEntry(char c,
 
 Console::Console()
     : mBase(reinterpret_cast<uint16_t *>(0xB8000)),
-      mCursor{0, 0}
+      mCursor{0, 0},
+      mColor(makeVGAColor(Console::Color::LightGray, Console::Color::Black))
 { }
 
 
 void
 Console::clear(Console::Color color)
 {
-    const uint16_t vgaColor = makeVGAColor(Color::LightGray, color);
+    setColor(Color::LightGray, color);
     for (size_t y = 0; y < Console::Height; y++) {
         for (size_t x = 0; x < Console::Width; x++) {
-            const size_t index = y * Console::Width + x;
-            mBase[index] = makeVGAEntry(' ', vgaColor);
+            putEntryAt(x, y, ' ', mColor);
         }
     }
+}
+
+
+void
+Console::writeChar(char c)
+{
+    putEntryAt(mCursor.col, mCursor.row, c, mColor);
+    if (++mCursor.col == Console::Width) {
+        mCursor.col = 0;
+        if (++mCursor.row == Console::Height) {
+            mCursor.row = 0;
+        }
+    }
+}
+
+void
+Console::writeString(const char *str)
+{
+    // XXX: THIS IS VERY UNSAFE. PUT DOWN THE POINTER ERYN. NO BAD ERYN DONT YOU DARE.
+    const char *cur = str;
+    while (*cur != '\0') {
+        writeChar(*cur++);
+    }
+}
+
+void
+Console::setColor(Console::Color fg,
+                  Console::Color bg)
+{
+    mColor = makeVGAColor(fg, bg);
+}
+
+/*
+ * Private
+ */
+
+void
+Console::putEntryAt(size_t x,
+                    size_t y,
+                    char c,
+                    uint8_t color)
+{
+    const size_t index = y * Console::Width + x;
+    mBase[index] = makeVGAEntry(c, color);
 }
 
 } /* namespace kernel */
