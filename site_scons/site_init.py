@@ -105,6 +105,9 @@ class Environment(SCons.Environment.Environment):
         if colorful and sys.stdout.isatty():
             if 'clang' in self['CC'] or 'clang' in self['CXX']:
                 self.AppendUnique(CCFLAGS=['-fcolor-diagnostics'])
+            elif 'gcc' in self['CC'] or 'g++' in self['CXX']:
+                # TODO: Also set a GCC_COLORS variable in the system environment?
+                self.AppendUnique(CCFLAGS=['-fdiagnostics-color=always'])
 
         # Pretty printing
         self.SetDefault(ARCOMSTR=Environment._comstr('Archiving', succinct))
