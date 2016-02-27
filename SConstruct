@@ -9,11 +9,9 @@ import logging
 
 setup_logging()
 
-BUILD_CMDS = get_bool_argument(ARGUMENTS.get('BUILD_CMDS', False))
 MODE = ARGUMENTS.get('MODE', None)
+SUCCINCT = bool(ARGUMENTS.get('SUCCINCT', True))
 
 for mode in (MODE.split(',') if MODE else ['debug']):
-    env = Environment.for_mode(mode)
-    env.process_lib_dirs()
+    env = Environment.for_mode(mode, succinct=SUCCINCT)
     env.process_src()
-    env.process_tests()
