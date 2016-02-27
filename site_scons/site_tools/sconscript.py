@@ -9,12 +9,15 @@ import SCons.Script
 
 def _do_sconscript(env):
     original_sconscript = env.SConscript
-    
+
     def sconscript(env, sconscript, clone=False, *args, **kwargs):
         exports = {'Library': env.Library,
                    'StaticLibrary': env.StaticLibrary,
                    'SharedLibrary': env.SharedLibrary,
-                   'Program': env.Program}
+                   'Program': env.Program,
+
+                   'Append': env.Append,
+                   'Replace': env.Replace}
         SCons.Script._SConscript.GlobalDict.update(exports)
         env.log('Reading {}'.format(sconscript))
         return original_sconscript(sconscript,
