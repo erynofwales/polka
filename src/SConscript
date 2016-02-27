@@ -10,6 +10,7 @@ files = [
     'crti.s',
     'crtn.s',
     'main.cc',
+    'Console.cc'
 ]
 
 toolchain_bin = Dir(os.environ['POLKA_TOOLCHAIN']).Dir('bin')

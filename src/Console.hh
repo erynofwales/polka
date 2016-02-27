@@ -6,6 +6,10 @@
  * Declaration of the Console class. Presents an API for a VGA console.
  */
 
+//#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 namespace kernel {
 
 struct Console
@@ -40,11 +44,11 @@ struct Console
     Console();
 
     /** Clear the console to the provided color. */
-    clear(Color color = Color::Black);
+    void clear(Color color = Color::Black);
 
 private:
     uint16_t *const mBase;
     Cursor mCursor;
 };
-    
+
 } /* namespace kernel */
