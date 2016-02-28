@@ -10,7 +10,8 @@ import subprocess
 files = [
     'boot.s',
     'Main.cc',
-    'Console.cc'
+    'Console.cc',
+    'cxa.cc',
 ]
 
 toolchain_bin = Dir(os.environ['POLKA_TOOLCHAIN']).Dir('bin')
