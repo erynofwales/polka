@@ -11,6 +11,7 @@ files = [
     'boot.s',
     'Main.cc',
     'Console.cc',
+    'Descriptors.cc',
     'cxa.cc',
 ]
 
