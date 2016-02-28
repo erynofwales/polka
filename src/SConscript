@@ -14,14 +14,14 @@ files = [
 ]
 
 toolchain_bin = Dir(os.environ['POLKA_TOOLCHAIN']).Dir('bin')
-Replace(AS=toolchain_bin.File('i686-elf-as'),
-        CC=toolchain_bin.File('i686-elf-gcc'),
-        CXX=toolchain_bin.File('i686-elf-g++'),
-        LINK=toolchain_bin.File('i686-elf-ld'))
-Append(CCFLAGS='-ffreestanding',
-       CPPDEFINES='__polka',
-       CXXFLAGS='-fno-exceptions -fno-rtti',
-       LINKFLAGS='-nostdlib -lgcc')
+env.Replace(AS=toolchain_bin.File('i686-elf-as'),
+            CC=toolchain_bin.File('i686-elf-gcc'),
+            CXX=toolchain_bin.File('i686-elf-g++'),
+            LINK=toolchain_bin.File('i686-elf-ld'))
+env.Append(CCFLAGS='-ffreestanding',
+           CPPDEFINES='__polka',
+           CXXFLAGS='-fno-exceptions -fno-rtti',
+           LINKFLAGS='-nostdlib -lgcc')
 
 # Global constructor files. These must be linked IN THIS ORDER.
 def crtfile_path(name):
