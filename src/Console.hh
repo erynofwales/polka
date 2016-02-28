@@ -41,6 +41,8 @@ struct Console
     static const size_t Width = 80;
     static const size_t Height = 25;
 
+    static auto systemConsole() -> Console&;
+
     Console();
 
     /** Clear the console to the provided color. */

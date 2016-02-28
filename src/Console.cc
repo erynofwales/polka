@@ -10,6 +10,16 @@
 
 namespace kernel {
 
+/*
+ * TODO: The build currently complains about missing __cxa_guard_acquire and
+ * __cxa_guard_release symbols if I add it there though. Once I've written
+ * those, this can be moved Console::systemConsole().
+ *
+ * See http://wiki.osdev.org/C%2B%2B for details.
+ */
+static Console sSystemConsole;
+
+
 /** Create a VGA color pair. */
 static inline uint8_t
 makeVGAColor(Console::Color fg,
@@ -29,7 +39,21 @@ makeVGAEntry(char c,
     return c16 | color16 << 8;
 }
 
+/*
+ * Static
+ */
 
+auto
+Console::systemConsole() -> Console&
+{
+    return sSystemConsole;
+}
+
+/*
+ * Public
+ */
+
+// TODO: Make this private once the kernel supports local static variables.
 Console::Console()
     : mBase(reinterpret_cast<uint16_t *>(0xB8000)),
       mCursor{0, 0},

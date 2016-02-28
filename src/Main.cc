@@ -14,8 +14,15 @@
 extern "C"
 void
 kearly()
+{ }
+
+
+/** The beginning of the world... */
+extern "C"
+void
+kmain()
 {
-    kernel::Console console;
+    auto console = kernel::Console::systemConsole();
     console.clear(kernel::Console::Color::Blue);
     console.writeString("Hello world!\n");
 
@@ -31,15 +38,8 @@ kearly()
         i = (i + 1) % 26;
         j = (j + 1) % 500;
 
-        for (uint32_t k = 0; k < (2u << 27) - 1; k++) {
+        for (uint32_t k = 0; k < (2u << 20) - 1; k++) {
             foo /= 2;
         }
     }
 }
-
-
-/** The beginning of the world... */
-extern "C"
-void
-kmain()
-{ }

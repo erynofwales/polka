@@ -4,11 +4,11 @@
 
 import os
 import os.path
+import shlex
+import subprocess
 
 files = [
     'boot.s',
-    'crti.s',
-    'crtn.s',
     'Main.cc',
     'Console.cc'
 ]
@@ -23,8 +23,18 @@ Append(CCFLAGS='-ffreestanding',
        CXXFLAGS='-fno-exceptions -fno-rtti',
        LINKFLAGS='-nostdlib -lgcc')
 
+# Global constructor files. These must be linked IN THIS ORDER.
+def crtfile_path(name):
+    cmd = shlex.split(env.subst('$CC $CCFLAGS $CFLAGS -print-file-name={}'.format(name)))
+    return subprocess.check_output(cmd).strip()
+
+crtbegin_file = Command('crtbegin.o', [], Copy('$TARGET', crtfile_path('crtbegin.o')))
+crtend_file = Command('crtend.o', [], Copy('$TARGET', crtfile_path('crtend.o')))
+crtinit_files = ['crti.s', crtbegin_file]
+crtfini_files = [crtend_file, 'crtn.s']
+
 linker_script = File('linker.ld')
-kernel = Program('polka.bin', files, LINKFLAGS='-T {}'.format(linker_script.path))
+kernel = Program('polka.bin', crtinit_files + files + crtfini_files, LINKFLAGS='-T {}'.format(linker_script.path))
 Depends(kernel, linker_script)
 Alias('kernel', kernel)
 
