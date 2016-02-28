@@ -26,6 +26,7 @@ kmain()
     console.clear(kernel::Console::Color::Blue);
     console.writeString("Hello world!\n");
 
+    // TODO: The performance of this loop slowed down a *lot* (7-8 orders of magnitude according to the busy loop) when I moved this code from kearly() to here. I wonder if it has something to do with object initialization? Should probably investigate some.
     volatile int foo = 0;
     int j = 0;
     int i = 0;
