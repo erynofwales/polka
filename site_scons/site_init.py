@@ -138,8 +138,6 @@ class Environment(SCons.Environment.Environment):
 
     def process_src(self):
         out_dir = self.build_root.Dir('src')
-        # TODO: Do the thing.
-        # do_sconscript(env, env.source_root, src_out_dir)
         self.SConscript(self.src_root.File('SConscript'),
                         variant_dir=out_dir)
         self.Append(CPPPATH=[self.src_root])
