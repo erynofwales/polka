@@ -3,11 +3,8 @@
 
 import logging
 import sys
-
 import SCons.Environment
 import SCons.Errors
-
-import paths
 
 
 def setup_logging(level=logging.DEBUG):
@@ -105,6 +102,9 @@ class Environment(SCons.Environment.Environment):
         if colorful and sys.stdout.isatty():
             if 'clang' in self['CC'] or 'clang' in self['CXX']:
                 self.AppendUnique(CCFLAGS=['-fcolor-diagnostics'])
+            elif 'gcc' in self['CC'] or 'g++' in self['CXX']:
+                # TODO: Also set a GCC_COLORS variable in the system environment?
+                self.AppendUnique(CCFLAGS=['-fdiagnostics-color=always'])
 
         # Pretty printing
         self.SetDefault(ARCOMSTR=Environment._comstr('Archiving', succinct))
@@ -135,8 +135,6 @@ class Environment(SCons.Environment.Environment):
 
     def process_src(self):
         out_dir = self.build_root.Dir('src')
-        # TODO: Do the thing.
-        # do_sconscript(env, env.source_root, src_out_dir)
         self.SConscript(self.src_root.File('SConscript'),
                         variant_dir=out_dir)
         self.Append(CPPPATH=[self.src_root])
