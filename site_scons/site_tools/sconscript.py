@@ -11,19 +11,18 @@ def _do_sconscript(env):
     original_sconscript = env.SConscript
 
     def sconscript(env, sconscript, clone=False, *args, **kwargs):
-        exports = {'Library': env.Library,
-                   'StaticLibrary': env.StaticLibrary,
-                   'SharedLibrary': env.SharedLibrary,
-                   'Program': env.Program,
-
-                   'Append': env.Append,
-                   'Replace': env.Replace}
+        exports = {
+            'Library': env.Library,
+            'Object': env.Object,
+            'SharedObject': env.SharedObject,
+            'StaticLibrary': env.StaticLibrary,
+            'SharedLibrary': env.SharedLibrary,
+            'Program': env.Program,
+            'env': env.Clone() if clone else env,
+        }
         SCons.Script._SConscript.GlobalDict.update(exports)
         env.log('Reading {}'.format(sconscript))
-        return original_sconscript(sconscript,
-                                   {'env': env.Clone() if clone else env},
-                                   *args,
-                                   **kwargs)
+        return original_sconscript(sconscript, {}, *args, **kwargs)
 
     return sconscript
 
