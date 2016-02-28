@@ -3,11 +3,8 @@
 
 import logging
 import sys
-
 import SCons.Environment
 import SCons.Errors
-
-import paths
 
 
 def setup_logging(level=logging.DEBUG):
