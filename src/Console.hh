@@ -41,7 +41,7 @@ struct Console
     static const size_t Width = 80;
     static const size_t Height = 25;
 
-    Console();
+    static Console &systemConsole();
 
     /** Clear the console to the provided color. */
     void clear();
@@ -59,6 +59,8 @@ private:
     uint16_t *const mBase;
     Cursor mCursor;
     uint8_t mColor;
+
+    Console();
 
     void putEntryAt(size_t x, size_t y, char c, uint8_t color);
     void scroll(size_t lines = 1);

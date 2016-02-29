@@ -30,15 +30,19 @@ makeVGAEntry(char c,
 }
 
 /*
- * Public
+ * Static
  */
 
-Console::Console()
-    : mBase(reinterpret_cast<uint16_t *>(0xB8000)),
-      mCursor{0, 0},
-      mColor(makeVGAColor(Console::Color::LightGray, Console::Color::Black))
-{ }
+Console &
+Console::systemConsole()
+{
+    static Console sSystemConsole;
+    return sSystemConsole;
+}
 
+/*
+ * Public
+ */
 
 void
 Console::clear()
@@ -113,6 +117,13 @@ Console::setColor(Console::Color fg,
 /*
  * Private
  */
+
+Console::Console()
+    : mBase(reinterpret_cast<uint16_t *>(0xB8000)),
+      mCursor{0, 0},
+      mColor(makeVGAColor(Console::Color::LightGray, Console::Color::Black))
+{ }
+
 
 void
 Console::putEntryAt(size_t x,

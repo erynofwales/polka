@@ -15,7 +15,7 @@ extern "C"
 void
 kearly()
 {
-    kernel::Console console;
+    auto console = kernel::Console::systemConsole();
     console.clear(kernel::Console::Color::Blue);
     console.writeString("Loading system ...\n");
 
