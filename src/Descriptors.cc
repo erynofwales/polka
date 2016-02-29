@@ -6,9 +6,18 @@
  * Oh god oh god. Descriptor tables.
  */
 
+#include <stddef.h>
 #include <stdint.h>
+#include "Descriptors.hh"
 
 namespace kernel {
+
+/**
+ * SegmentDescriptors are entries in the GDT and LDT that describe memory
+ * segments. Each descriptor is two double-words (8 bytes, 64 bits) long.
+ */
+typedef uint64_t SegmentDescriptor;
+
 
 /** Descriptor privilege level. */
 enum class DPL {
@@ -17,6 +26,7 @@ enum class DPL {
     Ring2 = 0x2,
     Ring3 = 0x3
 };
+
 
 /** A four bit value describing the type of the segment. */
 enum class Type {
@@ -41,13 +51,18 @@ enum class Type {
     CodeEXRCA   = 0xf  // Execute/read, conforming, accessed
 };
 
-/**
- * SegmentDescriptors are entries in the GDT and LDT that describe memory
- * segments. Each descriptor is two double-words (8 bytes, 64 bits) long.
- */
-typedef uint64_t SegmentDescriptor;
 
-SegmentDescriptor sGDT[4];
+/** Six byte field containing the length and a linear address where the GDT lives. */
+struct GDTPointer
+{
+    uint16_t limit;
+    uint32_t base;
+} __attribute((__packed__));
+
+
+static const size_t GDTSize = 5;
+static SegmentDescriptor sGDT[GDTSize];
+
 
 static inline SegmentDescriptor
 createSegmentDescriptor(uint32_t base,
@@ -79,6 +94,41 @@ createSegmentDescriptor(uint32_t base,
     descriptor |= limit        & 0x0000FFFF;    // Bits 15:00 of the segment limit.
 
     return descriptor;
+}
+
+/*
+ * Static
+ */
+
+void
+initGDT()
+{
+    sGDT[0] = 0;    // First descriptor is always NULL.
+    sGDT[1] = createSegmentDescriptor(0x00000000, 0x000FFFFF, Type::CodeEXR, DPL::Ring0);
+    sGDT[2] = createSegmentDescriptor(0x00000000, 0x000FFFFF, Type::DataRW, DPL::Ring0);
+    sGDT[3] = 0;    // Unused for now.
+    sGDT[4] = 0;    // Unused for now.
+
+    GDTPointer gdt {GDTSize * sizeof(SegmentDescriptor) - 1, uint32_t(&sGDT)};
+
+    /*
+     * Load the new GDT with the pointer defined above. The GDT isn't actually
+     * used until the segment registers are reladed. Below, CS is reloaded by
+     * a long jump into the new code segment. The rest of the segment registers
+     * can be loaded directly.
+     */
+    asm volatile(
+        "lgdt %0\n"
+        "ljmpl $0x08, $reloadSegments\n"
+        "reloadSegments:\n"
+        "movl $0x10, %%eax\n"
+        "movl %%eax, %%ds\n"
+        "movl %%eax, %%es\n"
+        "movl %%eax, %%fs\n"
+        "movl %%eax, %%gs\n"
+        "movl %%eax, %%ss\n"
+        : : "m" (gdt)
+        : "%eax");
 }
 
 } /* namespace kernel */

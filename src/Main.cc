@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "Console.hh"
+#include "Descriptors.hh"
 
 #if defined(__linux__)
 #error "This file should be compiled with a cross-compiler, not the Linux system compiler!"
@@ -18,6 +19,8 @@ kearly()
     auto console = kernel::Console::systemConsole();
     console.clear(kernel::Console::Color::Blue);
     console.writeString("Loading system ...\n");
+
+    kernel::initGDT();
 
     volatile int foo = 0;
     int i = 0;
