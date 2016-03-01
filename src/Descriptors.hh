@@ -11,4 +11,86 @@ namespace kernel {
 
 void initGDT();
 
+struct GDT
+{
+    /**
+     * SegmentDescriptors are entries in the GDT and LDT that describe memory
+     * segments. Each descriptor is two double-words (8 bytes, 64 bits) long.
+     */
+    typedef uint64_t Descriptor;
+
+    /** Descriptor privilege level. */
+    enum class DPL {
+        Ring0 = 0x0,
+        Ring1 = 0x1,
+        Ring2 = 0x2,
+        Ring3 = 0x3
+    };
+
+    /** A four bit value describing the type of the segment. */
+    enum class Type {
+        // Data segment types
+        DataRO      = 0x0, // Read-only
+        DataROA     = 0x1, // Read-only, accessed
+        DataRW      = 0x2, // Read/write
+        DataRWA     = 0x3, // Read/write, accessed
+        DataROEX    = 0x4, // Read-only, expand-down
+        DataROEXA   = 0x5, // Read-only, expand-down, accessed
+        DataRWEX    = 0x6, // Read/write, expand-down
+        DataRWEXA   = 0x7, // Read/write, expand-down, accessed
+
+        // Code segment types
+        CodeEX      = 0x8, // Execute-only
+        CodeEXA     = 0x9, // Execute-only, accessed
+        CodeEXR     = 0xa, // Execute/read
+        CodeEXRA    = 0xb, // Execute/read, accessed
+        CodeEXC     = 0xc, // Execute-only, conforming
+        CodeEXCA    = 0xd, // Execute-only, conforming, accessed
+        CodeEXRC    = 0xe, // Execute/read, conforming
+        CodeEXRCA   = 0xf  // Execute/read, conforming, accessed
+    };
+
+    /**
+     * Describes a memory segment for the GDT. See the Intel System Programming
+     * Guide, page 3-10, for details.
+     */
+    struct DescriptorSpec
+    {
+        uint32_t base;              // Base address of segment
+        uint32_t limit;             // Extent/length/size/limit of segment; 24 bits used
+        bool hasCoarseGranularity;  // G field; coarse = limit in 4KByte units
+        bool has32BitOperations;    // D/B field
+        bool hasNative64BitCode;    // L field; only valid in IA-32e mode
+        bool available;             // AVL field; available for system software use
+        bool isPresent;             // P field
+        DPL privilegeLevel;         // DPL field
+        bool isCodeDataSegment;     // S field
+        Type type;                  // Type field
+
+        static DescriptorSpec null();
+        static DescriptorSpec kernelSegment(uint32_t base, uint32_t limit, Type type);
+
+        Descriptor descriptor() const;
+    };
+
+    static GDT& systemGDT();
+
+    GDT();
+
+    /** Set the descriptor at the given `index` to the value of `spec`. */
+    void setDescriptor(size_t index, const DescriptorSpec& spec);
+
+    /** Set the descriptor at the given `index` to the NULL descriptor. */
+    void setNullDescriptor(size_t index);
+
+    /** Load this GDT into the CPU and flush the registers. */
+    void load();
+
+private:
+    // TODO: Maybe eventually I can make this variable? Maybe use templates?
+    static const size_t Size = 5;
+
+    Descriptor table[Size];
+};
+
 } /* namespace kernel */

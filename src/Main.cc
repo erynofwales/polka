@@ -16,26 +16,15 @@ extern "C"
 void
 kearly()
 {
-    auto console = kernel::Console::systemConsole();
+    using kernel::Console;
+
+    /*
+     * Create a console object for early use because global initialization
+     * hasn't happened yet.
+     */
+    Console console;
     console.clear(kernel::Console::Color::Blue);
     console.writeString("Loading system ...\n");
-
-    kernel::initGDT();
-
-    volatile int foo = 0;
-    int i = 0;
-    for (;;) {
-        if (i == 0) {
-            console.writeString("--- MARK ---\n");
-        }
-        console.writeChar('a' + i);
-        console.writeChar('\n');
-        i = (i + 1) % 26;
-
-        for (uint32_t k = 0; k < (2u << 20) - 1; k++) {
-            foo /= 2;
-        }
-    }
 }
 
 
@@ -43,4 +32,19 @@ kearly()
 extern "C"
 void
 kmain()
-{ }
+{
+    using kernel::Console;
+    using kernel::GDT;
+
+    // Reinitialize the system console now that we have global static objects.
+    auto console = Console::systemConsole();
+    console.clear(Console::Color::Blue);
+
+    auto gdt = GDT::systemGDT();
+    gdt.setNullDescriptor(0);
+    gdt.setDescriptor(1, GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, GDT::Type::CodeEXR));
+    gdt.setDescriptor(2, GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, GDT::Type::DataRW));
+    gdt.load();
+
+    console.writeString("GDT loaded\n");
+}
