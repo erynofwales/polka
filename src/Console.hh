@@ -43,6 +43,8 @@ struct Console
 
     static Console &systemConsole();
 
+    Console();
+
     /** Clear the console to the provided color. */
     void clear();
     void clear(Color color);
@@ -59,8 +61,6 @@ private:
     uint16_t *const mBase;
     Cursor mCursor;
     uint8_t mColor;
-
-    Console();
 
     void putEntryAt(size_t x, size_t y, char c, uint8_t color);
     void scroll(size_t lines = 1);

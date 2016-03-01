@@ -44,6 +44,13 @@ Console::systemConsole()
  * Public
  */
 
+Console::Console()
+    : mBase(reinterpret_cast<uint16_t *>(0xB8000)),
+      mCursor{0, 0},
+      mColor(makeVGAColor(Console::Color::LightGray, Console::Color::Black))
+{ }
+
+
 void
 Console::clear()
 {
@@ -117,13 +124,6 @@ Console::setColor(Console::Color fg,
 /*
  * Private
  */
-
-Console::Console()
-    : mBase(reinterpret_cast<uint16_t *>(0xB8000)),
-      mCursor{0, 0},
-      mColor(makeVGAColor(Console::Color::LightGray, Console::Color::Black))
-{ }
-
 
 void
 Console::putEntryAt(size_t x,
