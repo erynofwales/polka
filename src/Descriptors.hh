@@ -9,24 +9,24 @@
 
 namespace kernel {
 
-void initGDT();
+/**
+ * SegmentDescriptors are entries in the GDT and LDT that describe memory
+ * segments. Each descriptor is two double-words (8 bytes, 64 bits) long.
+ */
+typedef uint64_t Descriptor;
+
+
+/** Descriptor privilege level. */
+enum class DPL {
+    Ring0 = 0x0,
+    Ring1 = 0x1,
+    Ring2 = 0x2,
+    Ring3 = 0x3
+};
+
 
 struct GDT
 {
-    /**
-     * SegmentDescriptors are entries in the GDT and LDT that describe memory
-     * segments. Each descriptor is two double-words (8 bytes, 64 bits) long.
-     */
-    typedef uint64_t Descriptor;
-
-    /** Descriptor privilege level. */
-    enum class DPL {
-        Ring0 = 0x0,
-        Ring1 = 0x1,
-        Ring2 = 0x2,
-        Ring3 = 0x3
-    };
-
     /** A four bit value describing the type of the segment. */
     enum class Type {
         // Data segment types
@@ -91,6 +91,49 @@ private:
     static const size_t Size = 5;
 
     Descriptor table[Size];
+};
+
+
+struct IDT
+{
+    enum class Type {
+        Task = 0x5,
+        Interrupt = 0x6,
+        Trap = 0x7,
+    };
+
+    struct DescriptorSpec
+    {
+        uint16_t segment;
+        uint32_t offset;
+        bool isPresent;
+        DPL privilegeLevel;
+        bool is32BitGate;
+        Type type;
+
+        Descriptor descriptor() const;
+    };
+
+    static IDT& systemIDT();
+
+    IDT();
+
+    /** Set the descriptor at the given `index` to the value of `spec`. */
+    void setDescriptor(size_t index, const DescriptorSpec& spec);
+
+    /** Set the descriptor at the given `index` to the NULL descriptor. */
+    void setNullDescriptor(size_t index);
+
+    void load() const;
+
+private:
+    /**
+     * Size of the table. IDTs shouldn't have any more than this many
+     * descriptors.
+     */
+    static const size_t Size = 256;
+
+    Descriptor mTable[Size];
 };
 
 } /* namespace kernel */

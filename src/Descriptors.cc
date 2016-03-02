@@ -140,4 +140,88 @@ GDT::load()
         : "%eax");
 }
 
+/*
+ * Static
+ */
+
+IDT&
+IDT::systemIDT()
+{
+    static IDT sIDT;
+    return sIDT;
+}
+
+/*
+ * Public
+ */
+
+Descriptor
+IDT::DescriptorSpec::descriptor()
+    const
+{
+    Descriptor descriptor = 0;
+
+    if (type != Type::Task) {
+        descriptor = offset & 0xFFFF0000;
+    }
+
+    const auto p   = uint8_t(isPresent);
+    const auto dpl = uint8_t(privilegeLevel);
+    const auto d   = uint8_t((type == Type::Task) ? 0 : is32BitGate);
+    const auto typ = uint8_t(type);
+
+    descriptor |= p << 15;
+    descriptor |= dpl << 13;
+    descriptor |= d << 11;
+    descriptor |= typ << 8;
+
+    // Shift everything up by 32 to make room for the lower 4 bytes
+    descriptor <<= 32;
+
+    descriptor |= segment << 16;
+
+    if (type != Type::Task) {
+        descriptor |= offset & 0x0000FFFF;
+    }
+
+    return descriptor;
+}
+
+
+IDT::IDT()
+    : mTable{0}
+{ }
+
+
+void
+IDT::setDescriptor(size_t index,
+                   const DescriptorSpec& spec)
+{
+    if (index >= Size) {
+        return;
+    }
+    mTable[index] = spec.descriptor();
+}
+
+
+void
+IDT::setNullDescriptor(size_t index)
+{
+    if (index >= Size) {
+        return;
+    }
+    mTable[index] = 0;
+}
+
+
+void
+IDT::load()
+    const
+{
+    PseudoDescriptor idt{Size * sizeof(Descriptor) - 1, uint32_t(&mTable)};
+    asm volatile(
+        "lidt %0\n"
+        : : "m" (idt) :);
+}
+
 } /* namespace kernel */
