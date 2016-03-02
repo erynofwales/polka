@@ -25,6 +25,12 @@ enum class DPL {
 };
 
 
+/**
+ * Global Descriptor Table
+ *
+ * This class wraps the x86 Global Descriptor Table (GDT), which describes for
+ * the CPU the memory segments present on the system.
+ */
 struct GDT
 {
     /** A four bit value describing the type of the segment. */
@@ -93,6 +99,14 @@ private:
 };
 
 
+/**
+ * Interrupt Descriptor Table
+ *
+ * This class wraps the x86 Interrupt Descriptor Table (IDT), which tells the
+ * CPU how to handle interrupts. The table is a collection of gate descriptors,
+ * each of which is responsible for responding to a particular exception or
+ * interrupt.
+ */
 struct IDT
 {
     enum class Type {
