@@ -67,7 +67,6 @@ struct GDT
         bool isCodeDataSegment;     // S field
         Type type;                  // Type field
 
-        static DescriptorSpec null();
         static DescriptorSpec kernelSegment(uint32_t base, uint32_t limit, Type type);
 
         Descriptor descriptor() const;
@@ -84,7 +83,7 @@ struct GDT
     void setNullDescriptor(size_t index);
 
     /** Load this GDT into the CPU and flush the registers. */
-    void load();
+    void load() const;
 
 private:
     // TODO: Maybe eventually I can make this variable? Maybe use templates?

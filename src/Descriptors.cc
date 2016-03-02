@@ -42,14 +42,6 @@ GDT::systemGDT()
  */
 
 GDT::DescriptorSpec
-GDT::DescriptorSpec::null()
-{
-    // Specify ring 0 and RO data segment here because their values are 0.
-    return {0, 0, 0, 0, 0, 0, 0, DPL::Ring0, 0, Type::DataRO};
-}
-
-
-GDT::DescriptorSpec
 GDT::DescriptorSpec::kernelSegment(uint32_t base,
                                    uint32_t limit,
                                    GDT::Type type)
@@ -58,20 +50,20 @@ GDT::DescriptorSpec::kernelSegment(uint32_t base,
 }
 
 
-GDT::Descriptor
+Descriptor
 GDT::DescriptorSpec::descriptor()
     const
 {
     Descriptor descriptor = 0;
 
-    uint8_t g   = static_cast<uint8_t>(hasCoarseGranularity);
-    uint8_t db  = static_cast<uint8_t>(has32BitOperations);
-    uint8_t l   = static_cast<uint8_t>(hasNative64BitCode);
-    uint8_t avl = static_cast<uint8_t>(hasNative64BitCode);
-    uint8_t p   = static_cast<uint8_t>(isPresent);
-    uint8_t dpl = static_cast<uint8_t>(privilegeLevel);
-    uint8_t s   = static_cast<uint8_t>(isCodeDataSegment);
-    uint8_t typ = static_cast<uint8_t>(type);
+    const auto g   = uint8_t(hasCoarseGranularity);
+    const auto db  = uint8_t(has32BitOperations);
+    const auto l   = uint8_t(hasNative64BitCode);
+    const auto avl = uint8_t(hasNative64BitCode);
+    const auto p   = uint8_t(isPresent);
+    const auto dpl = uint8_t(privilegeLevel);
+    const auto s   = uint8_t(isCodeDataSegment);
+    const auto typ = uint8_t(type);
 
     descriptor  = base         & 0xFF000000;   // Bits 31:24 of the base address.
     descriptor |= (g << 23);                   // Granularity field
@@ -80,9 +72,9 @@ GDT::DescriptorSpec::descriptor()
     descriptor |= (avl << 20);                 // AVL field
     descriptor |= limit        & 0x000F0000;   // Bits 19:16 of the segment limit.
     descriptor |= (p << 15);                   // P field
-    descriptor |= (dpl << 13)  & 0x00006000;   // DPL field
+    descriptor |= (dpl << 13);                 // DPL field
     descriptor |= (s << 12);                   // S field
-    descriptor |= (typ << 8)   & 0x00000F00;   // Type field: see Type
+    descriptor |= (typ << 8);                  // Type field: see Type
     descriptor |= (base >> 16) & 0x000000FF;   // Bits 23:16 of the base address.
 
     // Shift everything up by 32 to make room for the lower 4 bytes
@@ -104,6 +96,9 @@ void
 GDT::setDescriptor(size_t index,
                    const GDT::DescriptorSpec& spec)
 {
+    if (index >= GDT::Size) {
+        return;
+    }
     table[index] = spec.descriptor();
 }
 
@@ -111,12 +106,16 @@ GDT::setDescriptor(size_t index,
 void
 GDT::setNullDescriptor(size_t index)
 {
+    if (index >= GDT::Size) {
+        return;
+    }
     table[index] = 0;
 }
 
 
 void
 GDT::load()
+    const
 {
     PseudoDescriptor gdt {Size * sizeof(Descriptor) - 1, uint32_t(&table)};
 
