@@ -35,6 +35,7 @@ kmain()
 {
     using kernel::Console;
     using kernel::GDT;
+    using kernel::IDT;
 
     // Reinitialize the system console now that we have global static objects.
     auto console = Console::systemConsole();
@@ -47,4 +48,9 @@ kmain()
     gdt.load();
 
     console.writeString("GDT loaded\n");
+
+    auto idt = IDT::systemIDT();
+    idt.load();
+
+    console.writeString("IDT loaded\n");
 }
