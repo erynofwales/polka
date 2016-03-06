@@ -22,9 +22,7 @@ inline uint8_t
 inb(uint16_t port)
 {
     uint8_t ret;
-    asm volatile("inb %[port], %[ret]",
-                 : [result] "=a"(ret)
-                 : [port] "Nd"(port));
+    asm volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
     return ret;
 }
 
@@ -33,9 +31,7 @@ inline uint16_t
 inw(uint16_t port)
 {
     uint16_t ret;
-    asm volatile("inw %[port], %[ret]",
-                 : [result] "=a"(ret)
-                 : [port] "Nd"(port));
+    asm volatile("inw %1, %0" : "=a"(ret) : "Nd"(port));
     return ret;
 }
 
@@ -44,9 +40,7 @@ inline uint32_t
 inl(uint16_t port)
 {
     uint32_t ret;
-    asm volatile("inl %[port], %[ret]",
-                 : [result] "=a"(ret)
-                 : [port] "Nd"(port));
+    asm volatile("inl %1, %0" : "=a"(ret) : "Nd"(port));
     return ret;
 }
 
@@ -75,6 +69,19 @@ outl(uint16_t port,
      uint32_t value)
 {
     asm volatile("outl %0, %1" : : "a"(value), "Nd"(port));
+}
+
+/*
+ * Wait
+ */
+
+inline void
+wait()
+{
+    asm volatile(
+        "jmp $1\n\t"
+        "1: jmp $2\n\t"
+        "2:");
 }
 
 } /* namespace io */

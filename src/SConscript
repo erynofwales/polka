@@ -12,6 +12,7 @@ files = [
     'Main.cc',
     'Console.cc',
     'Descriptors.cc',
+    'PIC.cc',
     'cxa.cc',
 ]
 
