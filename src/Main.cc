@@ -34,23 +34,19 @@ extern "C"
 void
 kmain()
 {
-    using kernel::Console;
-    using kernel::GDT;
-    using kernel::IDT;
-
     // Reinitialize the system console now that we have global static objects.
-    auto console = Console::systemConsole();
-    console.clear(Console::Color::Blue);
+    auto console = kernel::Console::systemConsole();
+    console.clear(kernel::Console::Color::Blue);
 
-    auto gdt = GDT::systemGDT();
+    auto gdt = kernel::GDT::systemGDT();
     gdt.setNullDescriptor(0);
-    gdt.setDescriptor(1, GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, GDT::Type::CodeEXR));
-    gdt.setDescriptor(2, GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, GDT::Type::DataRW));
+    gdt.setDescriptor(1, kernel::GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, kernel::GDT::Type::CodeEXR));
+    gdt.setDescriptor(2, kernel::GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, kernel::GDT::Type::DataRW));
     gdt.load();
 
     console.writeString("GDT loaded\n");
 
-    auto idt = IDT::systemIDT();
+    auto idt = kernel::IDT::systemIDT();
     idt.load();
 
     console.writeString("IDT loaded\n");
