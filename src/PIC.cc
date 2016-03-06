@@ -108,7 +108,7 @@ PIC::remap(uint8_t pic1Offset,
     uint8_t pic2IRQMask = 0;
     if (pic2IRQ > 0) {
         pic2IRQMask = 1;
-        for (int i = 1; i < pic2IRQ; i--) {
+        for (int i = 1; i < pic2IRQ; i++) {
             pic2IRQMask <<= 1;
         }
     } else {
