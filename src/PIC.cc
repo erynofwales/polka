@@ -98,6 +98,10 @@ PIC::remap(uint8_t pic1Offset,
      *   01: not buffered
      *   10: buffered mode PIC2 (PC mode)
      *   11: buffered mode PIC1 (PC mode)
+     *
+     * See also:
+     *   http://stanislavs.org/helppc/8259.html
+     *   http://wiki.osdev.org/PIC
      */
 
     // Ensure divisiblity by 8.
