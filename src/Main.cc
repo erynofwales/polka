@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "Console.hh"
 #include "Descriptors.hh"
-#include "PIC.hh"
+#include "Interrupts.hh"
 
 #if defined(__linux__)
 #error "This file should be compiled with a cross-compiler, not the Linux system compiler!"
@@ -46,13 +46,6 @@ kmain()
 
     console.writeString("GDT loaded\n");
 
-    auto idt = x86::IDT::systemIDT();
-    idt.load();
-
-    console.writeString("IDT loaded\n");
-
-    auto pic = x86::PIC::systemPIC();
-    pic.remap(0x20, 0x28, 2);   // Map hardware IRQs to interrupt vectors 32 through 48.
-
-    console.writeString("Hardware interrupts programmed\n");
+    auto interruptHandler = x86::InterruptHandler::systemInterruptHandler();
+    interruptHandler.initialize();
 }
