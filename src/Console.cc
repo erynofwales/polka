@@ -33,7 +33,7 @@ makeVGAEntry(char c,
  * Static
  */
 
-Console &
+Console&
 Console::systemConsole()
 {
     static Console sSystemConsole;
