@@ -51,7 +51,7 @@ kmain()
 
     console.writeString("IDT loaded\n");
 
-    auto pic = kernel::x86::PIC::systemPIC();
+    auto pic = x86::PIC::systemPIC();
     pic.remap(0x20, 0x28, 2);   // Map hardware IRQs to interrupt vectors 32 through 48.
 
     console.writeString("Hardware interrupts programmed\n");

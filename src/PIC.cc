@@ -42,7 +42,6 @@ namespace {
     } PIC1 { 0x0020, 0x0021 }, PIC2 { 0x00A0, 0x00A1 };
 }
 
-namespace kernel {
 namespace x86 {
 
 /*
@@ -120,8 +119,8 @@ PIC::remap(uint8_t pic1Offset,
     }
 
     // Save the current IRQ masks for each PIC
-    uint8_t pic1Mask = io::inb(PIC1.data);
-    uint8_t pic2Mask = io::inb(PIC2.data);
+    uint8_t pic1Mask = kernel::io::inb(PIC1.data);
+    uint8_t pic2Mask = kernel::io::inb(PIC2.data);
 
 #ifdef CONFIG_PIC_SHOULD_WAIT
 # define waitIfRequired() io::wait()
@@ -130,7 +129,7 @@ PIC::remap(uint8_t pic1Offset,
 #endif
 
 #define sendToPIC(port, byte) \
-    io::outb((port), (byte)); \
+    kernel::io::outb((port), (byte)); \
     waitIfRequired()
 
     sendToPIC(PIC1.command, ICW1::Initialize + ICW1::ICW4Required);
@@ -147,8 +146,8 @@ PIC::remap(uint8_t pic1Offset,
 #undef waitIfRequired
 
     // Restore the saved masks
-    io::outb(PIC2.data, pic1Mask);
-    io::outb(PIC2.data, pic2Mask);
+    kernel::io::outb(PIC2.data, pic1Mask);
+    kernel::io::outb(PIC2.data, pic2Mask);
 }
 
 void
@@ -160,10 +159,9 @@ PIC::endOfInterrupt(uint8_t irq)
      * notified. Otherwise, only PIC1 needs to be notified.
      */
     if (irq >= 8) {
-        io::outb(PIC2.command, OCW2::NOPEOI);
+        kernel::io::outb(PIC2.command, OCW2::NOPEOI);
     }
-    io::outb(PIC1.command, OCW2::NOPEOI);
+    kernel::io::outb(PIC1.command, OCW2::NOPEOI);
 }
 
 } /* namespace x86 */
-} /* namespace kernel */

@@ -12,7 +12,6 @@
 
 #include <stdint.h>
 
-namespace kernel {
 namespace x86 {
 
 /**
@@ -50,8 +49,7 @@ struct PIC
      */
     void enableInterrupt(uint8_t irq, bool enabled);
 };
-    
+
 } /* namespace x86 */
-} /* namespace kernel */
 
 #endif /* __PIC_HH__ */
