@@ -6,9 +6,17 @@
  * Interrupts, exceptions. Spooky scary...
  */
 
+#ifndef __INTERRUPTS_HH__
+#define __INTERRUPTS_HH__
+
+#include "Descriptors.hh"
+#include "PIC.hh"
+
+
 namespace kernel {
 
 } /* namespace kernel */
+
 
 namespace x86 {
 
@@ -34,6 +42,24 @@ enum class Interrupt {
     XM = 19,    // SIMD floating-point exception
     VE = 20,    // Virtualization exception
     // Interrupts 21 through 31 reserved
-}
+};
+
+struct InterruptHandler
+{
+    static InterruptHandler& systemInterruptHandler();
+
+    InterruptHandler();
+
+    void initialize();
+
+    void enableInterrupts() const;
+    void disableInterrupts() const;
+
+private:
+    PIC mPIC;
+    IDT mIDT;
+};
 
 } /* namespace x86 */
+
+#endif /* __INTERRUPTS_HH__ */
