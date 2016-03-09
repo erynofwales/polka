@@ -6,8 +6,6 @@
  * Oh god oh god. Descriptor tables.
  */
 
-#include <stddef.h>
-#include <stdint.h>
 #include "Descriptors.hh"
 
 namespace {
@@ -24,7 +22,7 @@ struct PseudoDescriptor
 
 }
 
-namespace kernel {
+namespace x86 {
 
 /*
  * Static
@@ -223,4 +221,4 @@ IDT::load()
         : : "m" (idt) :);
 }
 
-} /* namespace kernel */
+} /* namespace x86 */

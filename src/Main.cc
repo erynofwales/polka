@@ -38,15 +38,15 @@ kmain()
     auto console = kernel::Console::systemConsole();
     console.clear(kernel::Console::Color::Blue);
 
-    auto gdt = kernel::GDT::systemGDT();
+    auto gdt = x86::GDT::systemGDT();
     gdt.setNullDescriptor(0);
-    gdt.setDescriptor(1, kernel::GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, kernel::GDT::Type::CodeEXR));
-    gdt.setDescriptor(2, kernel::GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, kernel::GDT::Type::DataRW));
+    gdt.setDescriptor(1, x86::GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, x86::GDT::Type::CodeEXR));
+    gdt.setDescriptor(2, x86::GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, x86::GDT::Type::DataRW));
     gdt.load();
 
     console.writeString("GDT loaded\n");
 
-    auto idt = kernel::IDT::systemIDT();
+    auto idt = x86::IDT::systemIDT();
     idt.load();
 
     console.writeString("IDT loaded\n");

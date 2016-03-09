@@ -7,7 +7,14 @@
  * IDT.
  */
 
-namespace kernel {
+#ifndef __DESCRIPTORS_HH__
+#define __DESCRIPTORS_HH__
+
+#include <stddef.h>
+#include <stdint.h>
+
+
+namespace x86 {
 
 /**
  * SegmentDescriptors are entries in the GDT and LDT that describe memory
@@ -149,4 +156,6 @@ private:
     Descriptor mTable[Size];
 };
 
-} /* namespace kernel */
+} /* namespace x86 */
+
+#endif /* __DESCRIPTORS_HH__ */
