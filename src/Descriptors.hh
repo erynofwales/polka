@@ -102,7 +102,7 @@ private:
     // TODO: Maybe eventually I can make this variable? Maybe use templates?
     static const size_t Size = 5;
 
-    Descriptor table[Size];
+    Descriptor mTable[Size];
 };
 
 

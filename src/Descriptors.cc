@@ -86,7 +86,7 @@ GDT::DescriptorSpec::descriptor()
 
 
 GDT::GDT()
-    : table{0}
+    : mTable{0}
 { }
 
 
@@ -97,7 +97,7 @@ GDT::setDescriptor(size_t index,
     if (index >= GDT::Size) {
         return;
     }
-    table[index] = spec.descriptor();
+    mTable[index] = spec.descriptor();
 }
 
 
@@ -107,7 +107,7 @@ GDT::setNullDescriptor(size_t index)
     if (index >= GDT::Size) {
         return;
     }
-    table[index] = 0;
+    mTable[index] = 0;
 }
 
 
@@ -115,7 +115,7 @@ void
 GDT::load()
     const
 {
-    PseudoDescriptor gdt {Size * sizeof(Descriptor) - 1, uint32_t(&table)};
+    PseudoDescriptor gdt {Size * sizeof(Descriptor) - 1, uint32_t(&mTable)};
 
     /*
      * Load the new GDT with the pointer defined above. The GDT isn't actually
