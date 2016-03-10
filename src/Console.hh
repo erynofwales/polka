@@ -6,7 +6,9 @@
  * Declaration of the Console class. Presents an API for a VGA console.
  */
 
-//#include <stdbool.h>
+#ifndef __CONSOLE_HH__
+#define __CONSOLE_HH__
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -67,3 +69,5 @@ private:
 };
 
 } /* namespace kernel */
+
+#endif /* __CONSOLE_HH__ */
