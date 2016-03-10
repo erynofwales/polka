@@ -7,6 +7,8 @@
  * variables can be initialized properly.
  */
 
+#include "Console.hh"
+
 namespace __cxxabiv1 {
 
 // 64-bit integer type to service as mutex-like guard.
@@ -27,21 +29,24 @@ extern "C" {
 int
 __cxa_guard_acquire(__guard *g)
 {
-    return !*(g);
+    return !*(char *)(g);
 }
 
 
 void
 __cxa_guard_release(__guard *g)
 {
-    *g = 1;
+    *(char *)g = 1;
 }
 
 
 void
 __cxa_guard_abort(__guard *)
 {
-    // TODO: What would be useful to do here?
+    kernel::Console console;
+    console.clear(kernel::Console::Color::Red);
+    console.writeString("OOPS!\n");
+    console.writeString("Unhandled exception initializing static variable.\n");
 }
 
 }
