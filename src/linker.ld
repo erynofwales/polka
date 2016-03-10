@@ -11,7 +11,9 @@ SECTIONS
     .text BLOCK(4K) : ALIGN(4K)
     {
         *(.multiboot)
-        *(.text)
+        *(.init)
+        *(.text*)
+        *(.fini)
     }
 
     /* Read-only data. */
@@ -24,6 +26,8 @@ SECTIONS
     .data BLOCK(4K) : ALIGN(4K)
     {
         *(.data)
+        *(.ctor*)
+        *(.dtor*)
     }
 
     /* Read-write data (uninitialized) and stack */
