@@ -47,8 +47,9 @@ struct Console
 
     Console();
 
-    /** Clear the console to the provided color. */
+    /** Clear the console to the current color. */
     void clear();
+    /** Clear the console to the provided color. */
     void clear(Color color);
 
     /** Write a character to the terminal at the current cursor position. */
