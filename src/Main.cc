@@ -40,8 +40,8 @@ kmain()
 
     auto& gdt = x86::GDT::systemGDT();
     gdt.setNullDescriptor(0);
-    gdt.setDescriptor(1, x86::GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, x86::GDT::Type::CodeEXR));
-    gdt.setDescriptor(2, x86::GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, x86::GDT::Type::DataRW));
+    gdt.setDescriptor(1, x86::GDT::DescriptorSpec::kernelSegment(0, 0xFFFFFFFF, x86::GDT::Type::CodeEXR));
+    gdt.setDescriptor(2, x86::GDT::DescriptorSpec::kernelSegment(0, 0xFFFFFFFF, x86::GDT::Type::DataRW));
     gdt.load();
 
     console.writeString("GDT loaded\n");
