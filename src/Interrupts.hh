@@ -55,6 +55,8 @@ struct InterruptHandler
     void enableInterrupts() const;
     void disableInterrupts() const;
 
+    void postInterrupt(uint8_t interrupt);
+
 private:
     PIC mPIC;
     IDT mIDT;

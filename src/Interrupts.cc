@@ -79,6 +79,14 @@ InterruptHandler::disableInterrupts()
     asm("cli");
 }
 
+
+void
+InterruptHandler::postInterrupt(uint8_t interrupt)
+    const
+{
+    asm("int %0": : "a"(interrupt));
+}
+
 } /* namespace x86 */
 
 
