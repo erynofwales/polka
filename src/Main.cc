@@ -25,7 +25,7 @@ kearly()
      */
     Console console;
     console.clear(kernel::Console::Color::Blue);
-    console.writeString("Loading system ...\n");
+    console.printString("Loading system ...\n");
 }
 
 
@@ -44,12 +44,12 @@ kmain()
     gdt.setDescriptor(2, x86::GDT::DescriptorSpec::kernelSegment(0, 0xFFFFFFFF, x86::GDT::Type::DataRW));
     gdt.load();
 
-    console.writeString("GDT loaded\n");
+    console.printString("GDT loaded\n");
 
     auto& interruptHandler = x86::InterruptHandler::systemInterruptHandler();
     interruptHandler.initialize();
     interruptHandler.enableInterrupts();
-    console.writeString("Interrupts enabled\n");
+    console.printString("Interrupts enabled\n");
 
     for (;;) { }
 }

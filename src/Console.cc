@@ -72,7 +72,7 @@ Console::clear(Console::Color color)
 
 
 void
-Console::writeChar(char c)
+Console::printChar(char c)
 {
     switch (c) {
         case '\n':
@@ -106,12 +106,12 @@ Console::writeChar(char c)
 }
 
 void
-Console::writeString(const char *str)
+Console::printString(const char *str)
 {
     // XXX: THIS IS VERY UNSAFE. PUT DOWN THE POINTER ERYN. NO BAD ERYN DONT YOU DARE.
     const char *cur = str;
     while (*cur != '\0') {
-        writeChar(*cur++);
+        printChar(*cur++);
     }
 }
 

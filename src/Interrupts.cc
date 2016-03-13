@@ -53,14 +53,14 @@ InterruptHandler::initialize()
         mIDT.setDescriptor(i, IDT::DescriptorSpec::exceptionHandler(1, &unhandledInterrupt));
     }
     mIDT.load();
-    console.writeString("Interrupt table loaded\n");
+    console.printString("Interrupt table loaded\n");
 
     mPIC.initialize(0x20, 0x28);  // Map hardware IRQs to interrupt vectors 32 through 48.
-    console.writeString("Hardware interrupts initialized\n");
+    console.printString("Hardware interrupts initialized\n");
 
     // Enable the keyboard interrupt.
     mPIC.enableInterrupt(1, true);
-    console.writeString("Enabling keyboard interrupt\n");
+    console.printString("Enabling keyboard interrupt\n");
 }
 
 
@@ -87,7 +87,7 @@ void
 doUnhandledInterrupt()
 {
     auto& console = kernel::Console::systemConsole();
-    console.writeString("Received unhandled interrupt.\nAbort. :(");
+    console.printString("Received unhandled interrupt.\nAbort. :(");
 }
 
 
@@ -98,25 +98,25 @@ dispatchExceptionHandler(size_t vector)
     using x86::Interrupt;
 
     auto& console = kernel::Console::systemConsole();
-    console.writeString("Received exception ");
+    console.printString("Received exception ");
     switch (Interrupt(vector)) {
         case Interrupt::DE:
-            console.writeString("#DE");
+            console.printString("#DE");
             break;
         case Interrupt::NMI:
-            console.writeString("NMI");
+            console.printString("NMI");
             break;
         case Interrupt::DF:
-            console.writeString("#DF");
+            console.printString("#DF");
             break;
         case Interrupt::GP:
-            console.writeString("#GP");
+            console.printString("#GP");
             break;
         default:
-            console.writeString("SOME OTHER THING");
+            console.printString("SOME OTHER THING");
             break;
     }
-    console.writeString("\nAbort. :(");
+    console.printString("\nAbort. :(");
 }
 
 extern "C"
@@ -124,7 +124,7 @@ void
 handleTimerInterrupt()
 {
     auto& console = kernel::Console::systemConsole();
-    console.writeString("Thyme!\n");
+    console.printString("Thyme!\n");
 }
 
 extern "C"
@@ -132,5 +132,5 @@ void
 handleKeyboardInterrupt()
 {
     auto& console = kernel::Console::systemConsole();
-    console.writeString("Key!\n");
+    console.printString("Key!\n");
 }

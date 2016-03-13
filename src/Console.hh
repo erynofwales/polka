@@ -53,10 +53,10 @@ struct Console
     void clear(Color color);
 
     /** Write a character to the terminal at the current cursor position. */
-    void writeChar(char c);
+    void printChar(char c);
 
     /** Write a string to the terminal at the current cursor position. */
-    void writeString(const char *str);
+    void printString(const char *str);
 
     void setColor(Color fg, Color bg);
 

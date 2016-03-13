@@ -45,8 +45,8 @@ __cxa_guard_abort(__guard *)
 {
     kernel::Console console;
     console.clear(kernel::Console::Color::Red);
-    console.writeString("OOPS!\n");
-    console.writeString("Unhandled exception initializing static variable.\n");
+    console.printString("OOPS!\n");
+    console.printString("Unhandled exception initializing static variable.\n");
 }
 
 }
