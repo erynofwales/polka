@@ -59,6 +59,7 @@ Console::clear()
             putEntryAt(x, y, ' ', mColor);
         }
     }
+    mCursor = {0, 0};
 }
 
 

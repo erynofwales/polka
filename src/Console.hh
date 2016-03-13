@@ -65,6 +65,9 @@ private:
     Cursor mCursor;
     uint8_t mColor;
 
+    Console(const Console& other) = delete;
+    Console& operator=(const Console& other) = delete;
+
     void putEntryAt(size_t x, size_t y, char c, uint8_t color);
     void scroll(size_t lines = 1);
 };
