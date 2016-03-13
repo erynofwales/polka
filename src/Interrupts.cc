@@ -85,6 +85,34 @@ InterruptHandler::disableInterrupts()
 
 
 void
+InterruptHandler::dispatchException(uint8_t exception)
+{
+    using x86::Interrupt;
+
+    auto& console = kernel::Console::systemConsole();
+    console.printString("Received exception ");
+    switch (Interrupt(exception)) {
+        case Interrupt::DE:
+            console.printString("#DE");
+            break;
+        case Interrupt::NMI:
+            console.printString("NMI");
+            break;
+        case Interrupt::DF:
+            console.printString("#DF");
+            break;
+        case Interrupt::GP:
+            console.printString("#GP");
+            break;
+        default:
+            console.printString("SOME OTHER THING");
+            break;
+    }
+    console.printString("\nAbort. :(");
+}
+
+
+void
 InterruptHandler::dispatchHardwareInterrupt(uint8_t irq)
 {
     switch (irq) {
@@ -150,28 +178,7 @@ extern "C"
 void
 dispatchExceptionHandler(size_t vector)
 {
-    using x86::Interrupt;
-
-    auto& console = kernel::Console::systemConsole();
-    console.printString("Received exception ");
-    switch (Interrupt(vector)) {
-        case Interrupt::DE:
-            console.printString("#DE");
-            break;
-        case Interrupt::NMI:
-            console.printString("NMI");
-            break;
-        case Interrupt::DF:
-            console.printString("#DF");
-            break;
-        case Interrupt::GP:
-            console.printString("#GP");
-            break;
-        default:
-            console.printString("SOME OTHER THING");
-            break;
-    }
-    console.printString("\nAbort. :(");
+    x86::InterruptHandler::systemInterruptHandler().dispatchException(vector);
 }
 
 

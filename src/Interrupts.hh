@@ -55,6 +55,7 @@ struct InterruptHandler
     void enableInterrupts() const;
     void disableInterrupts() const;
 
+    void dispatchException(uint8_t exception);
     void dispatchHardwareInterrupt(uint8_t irq);
 
 private:
