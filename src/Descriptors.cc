@@ -54,24 +54,30 @@ GDT::DescriptorSpec::descriptor()
 {
     Descriptor descriptor = 0;
 
-    const auto g   = uint8_t(hasCoarseGranularity);
-    const auto db  = uint8_t(has32BitOperations);
-    const auto l   = uint8_t(hasNative64BitCode);
-    const auto avl = uint8_t(hasNative64BitCode);
-    const auto p   = uint8_t(isPresent);
-    const auto dpl = uint8_t(privilegeLevel);
-    const auto s   = uint8_t(isCodeDataSegment);
-    const auto typ = uint8_t(type);
+    const auto dpl = uint8_t(privilegeLevel) & 0x3;
+    const auto typ = uint8_t(type) & 0xF;
 
     descriptor  = base         & 0xFF000000;   // Bits 31:24 of the base address.
-    descriptor |= (g << 23);                   // Granularity field
-    descriptor |= (db << 22);                  // D/B field
-    descriptor |= (l << 21);                   // L field
-    descriptor |= (avl << 20);                 // AVL field
+    if (hasCoarseGranularity) {
+        descriptor |= (1 << 23);               // Granularity field
+    }
+    if (has32BitOperations) {
+        descriptor |= (1 << 22);               // D/B field
+    }
+    if (hasNative64BitCode) {
+        descriptor |= (1 << 21);               // L field
+    }
+    if (available) {
+        descriptor |= (1 << 20);               // AVL field
+    }
     descriptor |= limit        & 0x000F0000;   // Bits 19:16 of the segment limit.
-    descriptor |= (p << 15);                   // P field
+    if (isPresent) {
+        descriptor |= (1 << 15);               // P field
+    }
     descriptor |= (dpl << 13);                 // DPL field
-    descriptor |= (s << 12);                   // S field
+    if (isCodeDataSegment) {
+        descriptor |= (1 << 12);               // S field
+    }
     descriptor |= (typ << 8);                  // Type field: see Type
     descriptor |= (base >> 16) & 0x000000FF;   // Bits 23:16 of the base address.
 
@@ -162,14 +168,16 @@ IDT::DescriptorSpec::descriptor()
         descriptor = offset & 0xFFFF0000;
     }
 
-    const auto p   = uint8_t(isPresent);
-    const auto dpl = uint8_t(privilegeLevel);
-    const auto d   = uint8_t((type == Type::Task) ? 0 : is32BitGate);
-    const auto typ = uint8_t(type);
+    const auto dpl = uint8_t(privilegeLevel) & 0x3;
+    const auto typ = uint8_t(type) & 0x7;
 
-    descriptor |= p << 15;
+    if (isPresent) {
+        descriptor |= 1 << 15;
+    }
     descriptor |= dpl << 13;
-    descriptor |= d << 11;
+    if (type != Type::Task && is32BitGate) {
+        descriptor |= 1 << 11;
+    }
     descriptor |= typ << 8;
 
     // Shift everything up by 32 to make room for the lower 4 bytes
@@ -216,9 +224,7 @@ IDT::load()
     const
 {
     PseudoDescriptor idt{Size * sizeof(Descriptor) - 1, uint32_t(&mTable)};
-    asm volatile(
-        "lidt %0\n"
-        : : "m" (idt) :);
+    asm volatile("lidt %0\n" : : "m" (idt));
 }
 
 } /* namespace x86 */

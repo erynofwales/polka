@@ -24,7 +24,7 @@ typedef uint64_t Descriptor;
 
 
 /** Descriptor privilege level. */
-enum class DPL {
+enum class DPL : uint8_t {
     Ring0 = 0x0,
     Ring1 = 0x1,
     Ring2 = 0x2,
@@ -41,7 +41,7 @@ enum class DPL {
 struct GDT
 {
     /** A four bit value describing the type of the segment. */
-    enum class Type {
+    enum class Type : uint8_t {
         // Data segment types
         DataRO      = 0x0, // Read-only
         DataROA     = 0x1, // Read-only, accessed
@@ -116,7 +116,7 @@ private:
  */
 struct IDT
 {
-    enum class Type {
+    enum class Type : uint8_t {
         Task = 0x5,
         Interrupt = 0x6,
         Trap = 0x7,
