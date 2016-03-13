@@ -17,6 +17,8 @@ files = [
     'PIC.cc',
     'cxa.cc',
     'isr.S',
+
+    'kstd/CString.cc'
 ]
 
 toolchain_bin = Dir(os.environ['POLKA_TOOLCHAIN']).Dir('bin')

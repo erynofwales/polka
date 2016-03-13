@@ -7,9 +7,13 @@
  */
 
 #include <stdarg.h>
+#include "Console.hh"
+#include "kstd/ASCII.hh"
+#include "kstd/CString.hh"
+
+namespace {
 
 void itoa(int value, char* buffer, int base);
-
 
 struct PrintfSpec
 {
@@ -50,7 +54,7 @@ struct PrintfSpec
     Value value;
 
     void clear();
-    int print(Console& console);
+    int print(kernel::Console& console);
 };
 
 
@@ -65,7 +69,7 @@ PrintfSpec::clear()
 
 
 int
-PrintfSpec::print(Console& console)
+PrintfSpec::print(kernel::Console& console)
 {
     int nchars = 0;
     int length = 0;
@@ -82,9 +86,9 @@ PrintfSpec::print(Console& console)
             width = 1;
         }
         for (int i = 1; i < width; i++) {
-            putchar(' ');
+            console.printChar(' ');
         }
-        putchar(value.c);
+        console.printChar(value.c);
         return width;
     }
 
@@ -129,13 +133,13 @@ PrintfSpec::print(Console& console)
                     break;
             }
         }
-        length = strlen(buf);
+        length = kstd::CString::length(buf);
         if (width < length) {
             width = length;
         }
         str = buf;
     } else if (type == TypeString) {
-        length = strlen(value.s);
+        length = kstd::CString::length(value.s);
         if (width < length) {
             width = length;
         }
@@ -194,46 +198,6 @@ itoa(int value,
 }
 
 
-void
-to_upper(char* buffer)
-{
-    char* p = buffer;
-    for (char* p = buffer; *p != 0; p++) {
-        if (*p >= 'a' && *p <= 'z') {
-            *p = (*p - 'a') + 'A';
-        }
-    }
-}
-
-
-inline bool
-is_digit(char c)
-{
-    return c >= '0' && c <= '9';
-}
-
-
-inline bool
-is_hex(char c)
-{
-    return is_digit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
-}
-
-
-inline bool
-is_lower(char c)
-{
-    return c >= 'a' && c <= 'z';
-}
-
-
-inline bool
-is_upper(char c)
-{
-    return c >= 'A' && c <= 'Z';
-}
-
-
 inline bool
 is_size(char c)
 {
@@ -247,15 +211,10 @@ is_specifier(char c)
     return c == 'd' || c == 'x' || c == 'X' || c == 'c' || c == 's';
 }
 
-
-inline bool
-is_letter(char c)
-{
-    return is_lower(c) || is_upper(c);
-}
+} /* anonymous namespace */
 
 namespace kernel {
-    
+
 int
 Console::printFormat(const char* fmt,
                      ...)
@@ -289,7 +248,7 @@ Console::printFormat(const char* fmt,
                     state = StateDefault;
                     printChar(*p);
                     nchars++;
-                } else if (is_digit(*p)) {
+                } else if (kstd::Char::isDigit(*p)) {
                     if (*p == '0' && !spec.zero) {
                         spec.zero = true;
                     } else {
@@ -303,7 +262,7 @@ Console::printFormat(const char* fmt,
                 }
                 break;
             case StateWidth:
-                if (is_digit(*p)) {
+                if (kstd::Char::isDigit(*p)) {
                     spec.width = 10 * spec.width + (*p - '0');
                 } else if (is_size(*p)) {
                     state = StateSize;
