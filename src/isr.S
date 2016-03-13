@@ -5,7 +5,7 @@
 
 .section .text
 .global unhandledInterrupt
-.global handleDEException, handleDFException, handleGPException
+.global handleDEException, handleNMIInterrupt, handleDFException, handleGPException
 .global handleHardwareInterrupt0, handleHardwareInterrupt1
 
 #define SaveContext \
@@ -21,15 +21,6 @@
     cli; \
     hlt
 
-#define SaveContextForHardwareInterrupt(irq) \
-    SaveContext \
-    pushl $irq
-
-#define RestoreContextForHardwareInterrupt(irq) \
-    addl $4, %esp; \
-    RestoreContext
-
-
 // Generic handler
 unhandledInterrupt:
     SaveContext
@@ -40,6 +31,14 @@ unhandledInterrupt:
 handleDEException:
     SaveContext
     pushl $0
+    call dispatchExceptionHandler
+    add $4, %esp
+    RestoreContextAndHalt
+
+// NMI interrupt
+handleNMIInterrupt:
+    SaveContext
+    pushl $2
     call dispatchExceptionHandler
     add $4, %esp
     RestoreContextAndHalt
@@ -63,6 +62,14 @@ handleGPException:
 /*
  * Hardware Interrupts
  */
+
+#define SaveContextForHardwareInterrupt(irq) \
+    SaveContext \
+    pushl $irq
+
+#define RestoreContextForHardwareInterrupt(irq) \
+    addl $4, %esp; \
+    RestoreContext
 
 handleHardwareInterrupt0:
     SaveContextForHardwareInterrupt(0)

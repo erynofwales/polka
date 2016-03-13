@@ -11,11 +11,10 @@
 #include "IO.hh"
 
 extern "C" {
-    void dispatchExceptionHandler(size_t vector);
-
     // Assembly functions. See isr.S.
     void unhandledInterrupt();
     void handleDEException();
+    void handleNMIInterrupt();
     void handleDFException();
     void handleGPException();
     void handleHardwareInterrupt0();
@@ -50,14 +49,23 @@ InterruptHandler::initialize()
 {
     auto& console = kernel::Console::systemConsole();
 
+    // All interrupts start out as "unhandled"
     for (size_t i = 0; i < IDT::Size; i++) {
         mIDT.setDescriptor(i, IDT::DescriptorSpec::exceptionHandler(0x8, &unhandledInterrupt));
     }
+
+    // System exceptions/faults
+    mIDT.setDescriptor(0x00, IDT::DescriptorSpec::exceptionHandler(0x8, &handleDEException));
+    mIDT.setDescriptor(0x02, IDT::DescriptorSpec::exceptionHandler(0x8, &handleNMIInterrupt));
+    mIDT.setDescriptor(0x08, IDT::DescriptorSpec::exceptionHandler(0x8, &handleDFException));
+    mIDT.setDescriptor(0x0D, IDT::DescriptorSpec::exceptionHandler(0x8, &handleGPException));
+
+
+    // Hardware interrupts
     mIDT.setDescriptor(0x20, IDT::DescriptorSpec::exceptionHandler(0x8, &handleHardwareInterrupt0));
     mIDT.setDescriptor(0x21, IDT::DescriptorSpec::exceptionHandler(0x8, &handleHardwareInterrupt1));
-    mIDT.load();
 
-    console.printString("IDT loaded\n");
+    mIDT.load();
 
     mPIC.initialize(0x20, 0x28);  // Map hardware IRQs to interrupt vectors 32 through 48.
     console.printString("Hardware interrupts initialized\n");
@@ -164,6 +172,9 @@ InterruptHandler::finishHardwareInterrupt(uint8_t irq)
 
 } /* namespace x86 */
 
+/*
+ * Interrupt handlers
+ */
 
 extern "C"
 void
