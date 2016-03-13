@@ -89,6 +89,13 @@ InterruptHandler::postInterrupt(uint8_t interrupt)
     asm("int %0": : "a"(interrupt));
 }
 
+
+void
+InterruptHandler::finishHardwareInterrupt(uint8_t irq)
+{
+    mPIC.endOfInterrupt(irq);
+}
+
 } /* namespace x86 */
 
 
@@ -143,4 +150,7 @@ handleKeyboardInterrupt()
 {
     auto& console = kernel::Console::systemConsole();
     console.printString("Key!\n");
+
+    auto& interruptHandler = x86::InterruptHandler::systemInterruptHandler();
+    interruptHandler.finishHardwareInterrupt(1);
 }

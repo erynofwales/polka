@@ -57,6 +57,8 @@ struct InterruptHandler
 
     void postInterrupt(uint8_t interrupt);
 
+    void finishHardwareInterrupt(uint8_t irq);
+
 private:
     PIC mPIC;
     IDT mIDT;
