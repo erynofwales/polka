@@ -7,6 +7,7 @@
  */
 
 #include "Descriptors.hh"
+#include "Console.hh"
 
 namespace {
 
@@ -123,6 +124,9 @@ GDT::load()
 {
     PseudoDescriptor gdt {Size * sizeof(Descriptor) - 1, uint32_t(&mTable)};
 
+    auto& console = kernel::Console::systemConsole();
+    console.printFormat("GDT: base = 0x%08lX, limit = %d\n", gdt.base, gdt.limit);
+
     /*
      * Load the new GDT with the pointer defined above. The GDT isn't actually
      * used until the segment registers are reladed. Below, CS is reloaded by
@@ -232,6 +236,10 @@ IDT::load()
     const
 {
     PseudoDescriptor idt{Size * sizeof(Descriptor) - 1, uint32_t(&mTable)};
+
+    auto& console = kernel::Console::systemConsole();
+    console.printFormat("IDT: base = 0x%08lX, limit = %d\n", idt.base, idt.limit);
+
     asm volatile("lidt %0\n" : : "m" (idt));
 }
 
