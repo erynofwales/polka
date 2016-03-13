@@ -55,13 +55,16 @@ struct InterruptHandler
     void enableInterrupts() const;
     void disableInterrupts() const;
 
-    void postInterrupt(uint8_t interrupt);
-
-    void finishHardwareInterrupt(uint8_t irq);
+    void dispatchHardwareInterrupt(uint8_t irq);
 
 private:
     PIC mPIC;
     IDT mIDT;
+
+    void doTimerInterrupt();
+    void doKeyboardInterrupt();
+
+    void finishHardwareInterrupt(uint8_t irq) const;
 };
 
 } /* namespace x86 */

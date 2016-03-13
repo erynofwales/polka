@@ -52,6 +52,7 @@ InterruptHandler::initialize()
     for (size_t i = 0; i < IDT::Size; i++) {
         mIDT.setDescriptor(i, IDT::DescriptorSpec::exceptionHandler(0x8, &unhandledInterrupt));
     }
+    mIDT.setDescriptor(0x20, IDT::DescriptorSpec::exceptionHandler(0x8, &handleHardwareInterrupt0));
     mIDT.setDescriptor(0x21, IDT::DescriptorSpec::exceptionHandler(0x8, &handleHardwareInterrupt1));
     mIDT.load();
 
@@ -83,15 +84,45 @@ InterruptHandler::disableInterrupts()
 
 
 void
-InterruptHandler::postInterrupt(uint8_t interrupt)
-    const
+InterruptHandler::dispatchHardwareInterrupt(uint8_t irq)
 {
-    asm("int %0": : "a"(interrupt));
+    switch (irq) {
+        case 0:
+            doTimerInterrupt();
+            break;
+        case 1:
+            doKeyboardInterrupt();
+            break;
+        default:
+            // TODO: Implement a panic function...
+            break;
+    }
+    finishHardwareInterrupt(irq);
+}
+
+/*
+ * Private
+ */
+
+void
+InterruptHandler::doTimerInterrupt()
+{
+    auto& console = kernel::Console::systemConsole();
+    console.printString("Thyme!\n");
 }
 
 
 void
+InterruptHandler::doKeyboardInterrupt()
+{
+    auto& console = kernel::Console::systemConsole();
+    console.printString("Key!\n");
+}
+
+
+inline void
 InterruptHandler::finishHardwareInterrupt(uint8_t irq)
+    const
 {
     mPIC.endOfInterrupt(irq);
 }
@@ -136,21 +167,10 @@ dispatchExceptionHandler(size_t vector)
     console.printString("\nAbort. :(");
 }
 
-extern "C"
-void
-handleTimerInterrupt()
-{
-    auto& console = kernel::Console::systemConsole();
-    console.printString("Thyme!\n");
-}
 
 extern "C"
 void
-handleKeyboardInterrupt()
+dispatchHardwareInterrupt(size_t irq)
 {
-    auto& console = kernel::Console::systemConsole();
-    console.printString("Key!\n");
-
-    auto& interruptHandler = x86::InterruptHandler::systemInterruptHandler();
-    interruptHandler.finishHardwareInterrupt(1);
+    x86::InterruptHandler::systemInterruptHandler().dispatchHardwareInterrupt(irq);
 }
