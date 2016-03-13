@@ -90,6 +90,7 @@ PIC::remap(uint8_t pic1Offset,
 
 void
 PIC::endOfInterrupt(uint8_t irq)
+    const
 {
     /*
      * Notifying the PICs that an interrupt has been completed uses OCW2 on the

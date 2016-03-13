@@ -56,7 +56,7 @@ struct PIC
      * interrupt has been handled. This _must_ be done after the kernel has
      * handled a hardware interrupt.
      */
-    void endOfInterrupt(uint8_t irq);
+    void endOfInterrupt(uint8_t irq) const;
 
     /**
      * Enable or disable the given IRQ. This is done by setting a mask bit in
