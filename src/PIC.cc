@@ -164,4 +164,50 @@ PIC::endOfInterrupt(uint8_t irq)
     kernel::io::outb(PIC1.command, OCW2::NOPEOI);
 }
 
+
+void
+PIC::enableInterrupt(uint8_t irq,
+                     bool enabled)
+{
+    if (enabled) {
+        enableIRQ(irq);
+    } else {
+        disableIRQ(irq);
+    }
+}
+
+/*
+ * Private
+ */
+
+inline uint16_t
+PIC::portForIRQ(uint8_t irq)
+{
+    return irq < 8 ? PIC1.data : PIC2.data;
+}
+
+
+void
+PIC::enableIRQ(uint8_t irq)
+{
+    uint16_t port = portForIRQ(irq);
+    if (irq >= 8) {
+        irq -= 8;
+    }
+    uint8_t value = kernel::io::inb(port) & ~(1 << irq);
+    kernel::io::outb(port, value);
+}
+
+
+void
+PIC::disableIRQ(uint8_t irq)
+{
+    uint16_t port = portForIRQ(irq);
+    if (irq >= 8) {
+        irq -= 8;
+    }
+    uint8_t value = kernel::io::inb(port) | (1 << irq);
+    kernel::io::outb(port, value);
+}
+
 } /* namespace x86 */

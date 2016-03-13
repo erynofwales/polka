@@ -48,6 +48,11 @@ struct PIC
      * the PIC's IMR register. If the bit is set, the IRQ is ignored.
      */
     void enableInterrupt(uint8_t irq, bool enabled);
+
+private:
+    uint16_t portForIRQ(uint8_t irq);
+    void enableIRQ(uint8_t irq);
+    void disableIRQ(uint8_t irq);
 };
 
 } /* namespace x86 */
