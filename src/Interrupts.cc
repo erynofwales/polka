@@ -8,6 +8,7 @@
 
 #include "Interrupts.hh"
 #include "Console.hh"
+#include "IO.hh"
 
 extern "C" {
     void dispatchExceptionHandler(size_t vector);
@@ -115,8 +116,14 @@ InterruptHandler::doTimerInterrupt()
 void
 InterruptHandler::doKeyboardInterrupt()
 {
+    // Quick 'n dirty read the scancode.
+    unsigned int c = 0;
+    do {
+        c = kernel::io::inb(0x60);
+    } while (c == 0);
+
     auto& console = kernel::Console::systemConsole();
-    console.printString("Key!\n");
+    console.printFormat("Key! (scancode 0x%02X)\n", c);
 }
 
 
