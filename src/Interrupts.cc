@@ -39,7 +39,8 @@ InterruptHandler::initialize()
 
     mIDT.load();
     console.writeString("Interrupt table loaded\n");
-    mPIC.remap(0x20, 0x28, 2);  // Map hardware IRQs to interrupt vectors 32 through 48.
+
+    mPIC.initialize(0x20, 0x28);  // Map hardware IRQs to interrupt vectors 32 through 48.
     console.writeString("Hardware interrupts initialized\n");
 }
 
