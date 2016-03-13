@@ -35,7 +35,7 @@ InterruptHandler::InterruptHandler()
 void
 InterruptHandler::initialize()
 {
-    auto console = kernel::Console::systemConsole();
+    auto& console = kernel::Console::systemConsole();
 
     mIDT.load();
     console.writeString("Interrupt table loaded\n");

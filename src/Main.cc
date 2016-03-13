@@ -35,10 +35,10 @@ void
 kmain()
 {
     // Reinitialize the system console now that we have global static objects.
-    auto console = kernel::Console::systemConsole();
+    auto& console = kernel::Console::systemConsole();
     console.clear(kernel::Console::Color::Blue);
 
-    auto gdt = x86::GDT::systemGDT();
+    auto& gdt = x86::GDT::systemGDT();
     gdt.setNullDescriptor(0);
     gdt.setDescriptor(1, x86::GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, x86::GDT::Type::CodeEXR));
     gdt.setDescriptor(2, x86::GDT::DescriptorSpec::kernelSegment(0, 0x000FFFFF, x86::GDT::Type::DataRW));
@@ -46,6 +46,6 @@ kmain()
 
     console.writeString("GDT loaded\n");
 
-    auto interruptHandler = x86::InterruptHandler::systemInterruptHandler();
+    auto& interruptHandler = x86::InterruptHandler::systemInterruptHandler();
     interruptHandler.initialize();
 }
