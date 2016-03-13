@@ -58,6 +58,12 @@ struct Console
     /** Write a string to the terminal at the current cursor position. */
     void printString(const char *str);
 
+    /**
+     * Write a format string to the current cursor position. Returns the number
+     * of characters printed.
+     */
+    int printFormat(const char *format, ...);
+
     void setColor(Color fg, Color bg);
 
 private:

@@ -11,6 +11,7 @@ files = [
     'boot.s',
     'Main.cc',
     'Console.cc',
+    'ConsolePrintFormat.cc',
     'Descriptors.cc',
     'Interrupts.cc',
     'PIC.cc',
