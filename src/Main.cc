@@ -43,7 +43,6 @@ kmain()
     gdt.setDescriptor(1, x86::GDT::DescriptorSpec::kernelSegment(0, 0xFFFFFFFF, x86::GDT::Type::CodeEXR));
     gdt.setDescriptor(2, x86::GDT::DescriptorSpec::kernelSegment(0, 0xFFFFFFFF, x86::GDT::Type::DataRW));
     gdt.load();
-
     console.printString("GDT loaded\n");
 
     auto& interruptHandler = x86::InterruptHandler::systemInterruptHandler();
