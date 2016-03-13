@@ -62,7 +62,8 @@ struct Console
      * Write a format string to the current cursor position. Returns the number
      * of characters printed.
      */
-    int printFormat(const char *format, ...);
+    int printFormat(const char *format, ...)
+        __attribute__((format (printf, 2, 3)));
 
     void setColor(Color fg, Color bg);
 
