@@ -48,4 +48,8 @@ kmain()
 
     auto& interruptHandler = x86::InterruptHandler::systemInterruptHandler();
     interruptHandler.initialize();
+    interruptHandler.enableInterrupts();
+    console.writeString("Interrupts enabled\n");
+
+    for (;;) { }
 }
