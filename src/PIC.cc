@@ -98,9 +98,9 @@ PIC::endOfInterrupt(uint8_t irq)
      * notified. Otherwise, only PIC1 needs to be notified.
      */
     if (irq >= 8) {
-        kernel::io::outb(PIC2.command, OCW2::NOPEOI);
+        kernel::io::outb(PIC2.command, OCW2::NonSpecificEOI);
     }
-    kernel::io::outb(PIC1.command, OCW2::NOPEOI);
+    kernel::io::outb(PIC1.command, OCW2::NonSpecificEOI);
 }
 
 
