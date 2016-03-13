@@ -50,10 +50,12 @@ InterruptHandler::initialize()
     auto& console = kernel::Console::systemConsole();
 
     for (size_t i = 0; i < IDT::Size; i++) {
-        mIDT.setDescriptor(i, IDT::DescriptorSpec::exceptionHandler(1, &unhandledInterrupt));
+        mIDT.setDescriptor(i, IDT::DescriptorSpec::exceptionHandler(0x8, &unhandledInterrupt));
     }
+    mIDT.setDescriptor(0x21, IDT::DescriptorSpec::exceptionHandler(0x8, &handleHardwareInterrupt1));
     mIDT.load();
-    console.printString("Interrupt table loaded\n");
+
+    console.printString("IDT loaded\n");
 
     mPIC.initialize(0x20, 0x28);  // Map hardware IRQs to interrupt vectors 32 through 48.
     console.printString("Hardware interrupts initialized\n");
