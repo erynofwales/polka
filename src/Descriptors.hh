@@ -124,6 +124,8 @@ struct IDT
 
     struct DescriptorSpec
     {
+        static DescriptorSpec exceptionHandler(uint16_t segment, void (*handler)());
+
         uint16_t segment;
         uint32_t offset;
         bool isPresent;

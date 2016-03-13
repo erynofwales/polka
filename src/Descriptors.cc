@@ -154,6 +154,14 @@ IDT::systemIDT()
     return sIDT;
 }
 
+
+IDT::DescriptorSpec
+IDT::DescriptorSpec::exceptionHandler(uint16_t segment,
+                                      void (*handler)())
+{
+    return {segment, uint32_t(handler), true, DPL::Ring0, true, Type::Interrupt};
+}
+
 /*
  * Public
  */
