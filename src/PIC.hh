@@ -30,11 +30,26 @@ struct PIC
     static PIC& systemPIC();
 
     /**
-     * Initialize and map the PIC chips into the interrupt vector space. The
-     * offsets must be divisible by 8. The `pic2IRQ` argument specifies which
-     * IRQ on first PIC the second PIC will be mapped to.
+     * Initialize the PIC chips by mapping their ranges out of the default
+     * (which overlap with the system exceptions). The offsets must be divisable
+     * by 8. Once the chips are initialized disable all interrupts.
+     *
+     * @param [in] pic1Offset   Offset of PIC1.
+     * @param [in] pic2Offset   Offset of PIC2.
+     * @param [in] pic2IRQ      IRQ on PIC1 where PIC2 will be mapped to.
      */
-    void remap(uint8_t pic1Offset, uint8_t pic2ffset, uint8_t pic2IRQ);
+    void initialize(uint8_t pic1Offset, uint8_t pic2Offset, uint8_t pic2IRQ = 2);
+
+    /**
+     * Remap the PIC chips into the interrupt vector space. The offsets must be
+     * divisible by 8. The interrupt masks are saved before remapping and
+     * restored afterwards.
+     *
+     * @param [in] pic1Offset   Offset of PIC1.
+     * @param [in] pic2Offset   Offset of PIC2.
+     * @param [in] pic2IRQ      IRQ on PIC1 where PIC2 will be mapped to.
+     */
+    void remap(uint8_t pic1Offset, uint8_t pic2Offset, uint8_t pic2IRQ = 2);
 
     /**
      * Notifies the PICs with an End Of Interrupt (EOI) command that the
@@ -53,6 +68,8 @@ private:
     uint16_t portForIRQ(uint8_t irq);
     void enableIRQ(uint8_t irq);
     void disableIRQ(uint8_t irq);
+
+    void initializePICs(uint8_t pic1Offset, uint8_t pic2Offset, uint8_t pic2IRQ);
 };
 
 } /* namespace x86 */

@@ -60,90 +60,28 @@ PIC::systemPIC()
  */
 
 void
+PIC::initialize(uint8_t pic1Offset,
+                uint8_t pic2Offset,
+                uint8_t pic2IRQ)
+{
+    initializePICs(pic1Offset, pic2Offset, pic2IRQ);
+
+    // Turn off interrupts.
+    kernel::io::outb(PIC1.data, 0xFF);
+    kernel::io::outb(PIC2.data, 0xFF);
+}
+
+
+void
 PIC::remap(uint8_t pic1Offset,
            uint8_t pic2Offset,
            uint8_t pic2IRQ)
 {
-    /*
-     * Initialization of the PIC chips requires programming both chips together.
-     * Each requires a series of four bytes: the first (ICW1) on their command
-     * ports, and the subsequent three (ICW2 through ICW4) on their data ports.
-     *
-     * ICW1 contains the following flags:
-     *   Bit 0: 1 = ICW4 required, 0 = ICW4 not required
-     *   Bit 1: 1 = single 8259, 0 = cascading 8259s
-     *   Bit 2: 1 = 4 byte interrupt vectors, 0 = 8 byte interrupt vectors
-     *   Bit 3: 1 = level triggered mode, 0 = edge triggered mode
-     *   Bit 4: 1 = initialization (this is required to be 1 for ICW1)
-     *   Bits 5, 6, 7 must all be 0
-     *
-     * ICW2 is the interrupt vector offset that this PIC's interrupt should be
-     * mapped to. It must be divisible by 0x8.
-     *
-     * ICW3 is different for the PIC1 and PIC2. For the PIC1, ICW3 should have
-     * one bit set indicating on which IRQ PIC2 (the cascaded PIC) will be. For
-     * PIC2, the first three bits of ICW3 indicate on which IRQ it will reside
-     * on the PIC1.
-     *
-     * ICW4 contains the following flags:
-     *   Bit 0: 1 = 80x86 mode, 0 = MCS 80/85 mode
-     *   Bit 1: 1 = auto EOI mode, 0 = normal EOI mode
-     *   Bits 2, 3: PIC2/PIC1 buffering mode
-     *   Bit 4: 1 = special fully nested mode (SFNM), 0 = sequential mode
-     *   Bits 5, 6, 7 must all be 0
-     *
-     * The buffering modes mentioned above are as follows:
-     *   00: not buffered
-     *   01: not buffered
-     *   10: buffered mode PIC2 (PC mode)
-     *   11: buffered mode PIC1 (PC mode)
-     *
-     * See also:
-     *   http://stanislavs.org/helppc/8259.html
-     *   http://wiki.osdev.org/PIC
-     */
-
-    // Ensure divisiblity by 8.
-    pic1Offset &= ~uint8_t(0x7);
-    pic2Offset &= ~uint8_t(0x7);
-
-    // TODO: Implement clamping and error handling.
-    uint8_t pic2IRQMask = 0;
-    if (pic2IRQ > 0) {
-        pic2IRQMask = 1;
-        for (int i = 1; i < pic2IRQ; i++) {
-            pic2IRQMask <<= 1;
-        }
-    } else {
-        // TODO: We have a problem.
-    }
-
     // Save the current IRQ masks for each PIC
     uint8_t pic1Mask = kernel::io::inb(PIC1.data);
     uint8_t pic2Mask = kernel::io::inb(PIC2.data);
 
-#ifdef CONFIG_PIC_SHOULD_WAIT
-# define waitIfRequired() io::wait()
-#else
-# define waitIfRequired()
-#endif
-
-#define sendToPIC(port, byte) \
-    kernel::io::outb((port), (byte)); \
-    waitIfRequired()
-
-    sendToPIC(PIC1.command, ICW1::Initialize + ICW1::ICW4Required);
-    sendToPIC(PIC1.data, pic1Offset);
-    sendToPIC(PIC1.data, pic2IRQMask);
-    sendToPIC(PIC1.data, ICW4::X86Mode + ICW4::AutoEOI);
-
-    sendToPIC(PIC2.command, ICW1::Initialize + ICW1::ICW4Required);
-    sendToPIC(PIC2.data, pic2Offset);
-    sendToPIC(PIC2.data, pic2IRQ);
-    sendToPIC(PIC2.data, ICW4::X86Mode + ICW4::AutoEOI);
-
-#undef sendToPIC
-#undef waitIfRequired
+    initializePICs(pic1Offset, pic2Offset, pic2IRQ);
 
     // Restore the saved masks
     kernel::io::outb(PIC2.data, pic1Mask);
@@ -208,6 +146,90 @@ PIC::disableIRQ(uint8_t irq)
     }
     uint8_t value = kernel::io::inb(port) | (1 << irq);
     kernel::io::outb(port, value);
+}
+
+
+void
+PIC::initializePICs(uint8_t pic1Offset,
+                    uint8_t pic2Offset,
+                    uint8_t pic2IRQ)
+{
+    /*
+     * Initialization of the PIC chips requires programming both chips together.
+     * Each requires a series of four bytes: the first (ICW1) on their command
+     * ports, and the subsequent three (ICW2 through ICW4) on their data ports.
+     *
+     * ICW1 contains the following flags:
+     *   Bit 0: 1 = ICW4 required, 0 = ICW4 not required
+     *   Bit 1: 1 = single 8259, 0 = cascading 8259s
+     *   Bit 2: 1 = 4 byte interrupt vectors, 0 = 8 byte interrupt vectors
+     *   Bit 3: 1 = level triggered mode, 0 = edge triggered mode
+     *   Bit 4: 1 = initialization (this is required to be 1 for ICW1)
+     *   Bits 5, 6, 7 must all be 0
+     *
+     * ICW2 is the interrupt vector offset that this PIC's interrupt should be
+     * mapped to. It must be divisible by 0x8.
+     *
+     * ICW3 is different for the PIC1 and PIC2. For the PIC1, ICW3 should have
+     * one bit set indicating on which IRQ PIC2 (the cascaded PIC) will be. For
+     * PIC2, the first three bits of ICW3 indicate on which IRQ it will reside
+     * on the PIC1.
+     *
+     * ICW4 contains the following flags:
+     *   Bit 0: 1 = 80x86 mode, 0 = MCS 80/85 mode
+     *   Bit 1: 1 = auto EOI mode, 0 = normal EOI mode
+     *   Bits 2, 3: PIC2/PIC1 buffering mode
+     *   Bit 4: 1 = special fully nested mode (SFNM), 0 = sequential mode
+     *   Bits 5, 6, 7 must all be 0
+     *
+     * The buffering modes mentioned above are as follows:
+     *   00: not buffered
+     *   01: not buffered
+     *   10: buffered mode PIC2 (PC mode)
+     *   11: buffered mode PIC1 (PC mode)
+     *
+     * See also:
+     *   http://stanislavs.org/helppc/8259.html
+     *   http://wiki.osdev.org/PIC
+     */
+
+    // Ensure divisiblity by 8.
+    pic1Offset &= ~uint8_t(0x7);
+    pic2Offset &= ~uint8_t(0x7);
+
+    // TODO: Implement clamping and error handling.
+    uint8_t pic2IRQMask = 0;
+    if (pic2IRQ < 16) {
+        pic2IRQMask = 1;
+        for (int i = 1; i < pic2IRQ; i++) {
+            pic2IRQMask <<= 1;
+        }
+    } else {
+        // TODO: We have a problem.
+    }
+
+#ifdef CONFIG_PIC_SHOULD_WAIT
+# define waitIfRequired() io::wait()
+#else
+# define waitIfRequired()
+#endif
+
+#define sendToPIC(port, byte) \
+    kernel::io::outb((port), (byte)); \
+    waitIfRequired()
+
+    sendToPIC(PIC1.command, ICW1::Initialize + ICW1::ICW4Required);
+    sendToPIC(PIC1.data, pic1Offset);
+    sendToPIC(PIC1.data, pic2IRQMask);
+    sendToPIC(PIC1.data, ICW4::X86Mode);
+
+    sendToPIC(PIC2.command, ICW1::Initialize + ICW1::ICW4Required);
+    sendToPIC(PIC2.data, pic2Offset);
+    sendToPIC(PIC2.data, pic2IRQ);
+    sendToPIC(PIC2.data, ICW4::X86Mode);
+
+#undef sendToPIC
+#undef waitIfRequired
 }
 
 } /* namespace x86 */
