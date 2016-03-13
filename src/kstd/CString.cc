@@ -15,9 +15,9 @@ namespace CString {
 size_t
 length(char *str)
 {
-    char *end = str;
-    while (end++ != '\0') { }
-    return end - str;
+    size_t i;
+    for (i = 0; str[i] != '\0'; i++) { }
+    return i;
 }
 
 
