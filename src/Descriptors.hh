@@ -136,6 +136,12 @@ struct IDT
         Descriptor descriptor() const;
     };
 
+    /**
+     * Size of the table. IDTs shouldn't have any more than this many
+     * descriptors.
+     */
+    static const size_t Size = 256;
+
     static IDT& systemIDT();
 
     IDT();
@@ -149,12 +155,6 @@ struct IDT
     void load() const;
 
 private:
-    /**
-     * Size of the table. IDTs shouldn't have any more than this many
-     * descriptors.
-     */
-    static const size_t Size = 256;
-
     Descriptor mTable[Size];
 };
 
