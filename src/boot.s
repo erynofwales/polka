@@ -41,7 +41,8 @@ _start:
     # Global initialization done here.
     call _init
 
-    # Here we go...
+    # Here we go... Give kmain the address of the multiboot info structure.
+    pushl %ebx
     call kmain
 
     # In case the function returns, we'll want to put the computer into an

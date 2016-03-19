@@ -1,8 +1,17 @@
+/* Main.cc
+ * vim: set tw=80:
+ * Eryn Wells <eryn@erynwells.me>
+ */
+/**
+ * Entry point for the kernel in C/C++.
+ */
+
 #include <stddef.h>
 #include <stdint.h>
 #include "Console.hh"
 #include "Descriptors.hh"
 #include "Interrupts.hh"
+#include "Multiboot.hh"
 
 #if defined(__linux__)
 #error "This file should be compiled with a cross-compiler, not the Linux system compiler!"
@@ -19,10 +28,7 @@ kearly()
 {
     using kernel::Console;
 
-    /*
-     * Create a console object for early use because global initialization
-     * hasn't happened yet.
-     */
+    // Create a console object for early use because global initialization hasn't happened yet.
     Console console;
     console.clear(kernel::Console::Color::Blue);
     console.printString("Loading system ...\n");
@@ -32,11 +38,18 @@ kearly()
 /** The beginning of the world... */
 extern "C"
 void
-kmain()
+kmain(multiboot::Information *information)
 {
+    multiboot::Information::setInformation(information);
+    auto info = multiboot::Information::information();
+
     // Reinitialize the system console now that we have global static objects.
     auto& console = kernel::Console::systemConsole();
     console.clear(kernel::Console::Color::Blue);
+
+    console.printString("Loading Polka ...\n");
+
+    console.printFormat("Detected memory: lower = %ld KB, upper = %ld KB\n", info->lowerMemoryKB(), info->upperMemoryKB());
 
     auto& gdt = x86::GDT::systemGDT();
     gdt.setNullDescriptor(0);
