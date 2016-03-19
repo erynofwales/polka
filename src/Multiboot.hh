@@ -15,18 +15,50 @@
 
 namespace multiboot {
 
+struct PACKED MemoryChunk
+{
+    /** Base address of the chunk of memory. */
+    uint64_t base;
+    /** Length of the chunk of memory, in bytes. */
+    uint64_t length;
+    /** Type of address range. 1 indicates available; all other values indicate reserved memory. */
+    uint32_t type;
+};
+
 /**
  * The multiboot information struct. Defined by the multiboot spec.
  * See http://www.gnu.org/software/grub/manual/multiboot/multiboot.html#Machine-state
  */
 struct PACKED Information
 {
+    struct MemoryMapIterator
+    {
+        MemoryMapIterator(uint32_t address, uint32_t count);
+        MemoryMapIterator(const MemoryMapIterator& other);
+
+        MemoryMapIterator& operator++();
+        MemoryMapIterator operator++(int);
+        MemoryChunk operator*();
+
+        bool operator==(const MemoryMapIterator& other) const;
+        bool operator!=(const MemoryMapIterator& other) const;
+
+    private:
+        MemoryChunk *mCurrent;
+        uint32_t mCount;
+    };
+
     static const Information *information();
     static void setInformation(Information* info);
 
     uint32_t lowerMemoryKB() const;
     uint32_t upperMemoryKB() const;
+
     const char* commandLine() const;
+
+    uint32_t memoryMapChunks() const;
+    MemoryMapIterator memoryMapBegin() const;
+    MemoryMapIterator memoryMapEnd() const;
 
 private:
     /**
@@ -98,16 +130,16 @@ private:
     } symbols;
 
     /**
+     * @defgroup Memory Map
      * Points to a buffer containing a memory map of the machine provided by the
      * BIOS. Defined only if `memoryMapPresent == true`.
+     * @{
      */
-    struct PACKED
-    {
-        /** Number of memory map entries present. */
-        uint32_t count;
-        /** Pointer to start of memory map entry array. */
-        uint32_t address;
-    } memoryMap;
+    /** Number of memory map entries present. */
+    uint32_t memoryMapCount;
+    /** Pointer to start of memory map entry array. */
+    uint32_t memoryMapAddress;
+    /** @} */
 
     /**
      * Points to a buffer containing a list of drive definitions provided by the
@@ -150,11 +182,6 @@ struct PACKED Module
     uint32_t string;
     /** Reserved and ignored. */
     uint32_t reserved;
-};
-
-// TODO: Define the MemoryMap struct
-struct PACKED MemoryChunk
-{
 };
 
 // TODO: Define the Drive struct
