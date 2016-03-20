@@ -34,6 +34,7 @@ stack_top:
 _start:
     # Set up some space for a call stack. The stack grows downwards, so esp gets set to the top of the stack.
     movl $stack_top, %esp
+    movl %esp, %ebp
 
     # Very early initialization done here.
     call kearly
