@@ -290,8 +290,10 @@ Console::printFormat(const char* fmt,
                 }
                 spec.type = Spec::Type::Int;
                 break;
-            case 'x':
             case 'X':
+                spec.capitalized = true;
+                // fall through
+            case 'x':
                 switch (spec.size) {
                     case Spec::Size::Normal:
                         spec.value.x = va_arg(vl, unsigned int);
