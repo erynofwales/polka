@@ -7,11 +7,11 @@
  */
 
 #include <stddef.h>
-#include <stdint.h>
 #include "Console.hh"
 #include "Descriptors.hh"
 #include "Interrupts.hh"
 #include "Multiboot.hh"
+#include "kstd/Types.hh"
 
 #if defined(__linux__)
 #error "This file should be compiled with a cross-compiler, not the Linux system compiler!"
@@ -57,8 +57,8 @@ kmain(multiboot::Information *information)
         auto begin = (*it).base;
         auto end = begin + (*it).length - 1;
         console.printFormat("  begin = 0x%08lX %08lX, end = 0x%08lX %08lX (%s)\n",
-                            uint32_t(begin >> 32), uint32_t(begin & 0xFFFFFFFF),
-                            uint32_t(end >> 32), uint32_t(end & 0xFFFFFFFF),
+                            u32(begin >> 32), u32(begin & 0xFFFFFFFF),
+                            u32(end >> 32), u32(end & 0xFFFFFFFF),
                             (*it).type == 1 ? "available" : "reserved");
     }
 
