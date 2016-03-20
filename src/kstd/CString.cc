@@ -12,12 +12,27 @@
 namespace kstd {
 namespace CString {
 
-size_t
-length(char *str)
+usize
+length(char* str)
 {
-    size_t i;
-    for (i = 0; str[i] != '\0'; i++) { }
+    usize i;
+    for (i = 0; str[i] != '\0'; i++);
     return i;
+}
+
+
+char*
+copy(char* dst,
+     const char* src,
+     usize length)
+{
+    for (usize i = 0; i < length; i++) {
+        dst[i] = src[i];
+        if (src[i] == '\0') {
+            break;
+        }
+    }
+    return dst;
 }
 
 
@@ -29,6 +44,28 @@ uppercase(char *str)
             *p = Char::toUpper(*p);
         }
     }
+}
+
+/*
+ * Converters
+ */
+
+char*
+fromInteger(int value,
+            char* str,
+            usize length)
+{
+    return 0;
+}
+
+
+char*
+fromBool(bool value,
+         char* str,
+         usize length)
+{
+    copy(str, value ? "true" : "false", length);
+    return str;
 }
 
 } /* namespace CString */
