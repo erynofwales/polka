@@ -49,7 +49,11 @@ kmain(multiboot::Information *information)
 
     console.printString("Loading Polka ...\n");
 
-    console.printFormat("Detected memory: lower = %ld KB, upper = %ld KB\n", info->lowerMemoryKB(), info->upperMemoryKB());
+    console.printFormat("Command line: \"%s\"\n", info->commandLine());
+
+    console.printFormat("Memory map:\n");
+    console.printFormat("  available: lower = %ld KB, upper = %ld KB\n", info->lowerMemoryKB(), info->upperMemoryKB());
+    // TODO: Print memory map, after determining that the info struct is correct.
 
     auto& gdt = x86::GDT::systemGDT();
     gdt.setNullDescriptor(0);
