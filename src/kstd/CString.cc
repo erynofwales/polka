@@ -46,7 +46,7 @@ reverse(char* str,
     char* p = str;
     char* t = str + max - 1;
     char c;
-    while (t > p) {
+    while (p < t) {
         c = *p;
         *p++ = *t;
         *t-- = c;
@@ -78,39 +78,53 @@ uppercase(char* str)
  * that `p - buffer` is the number of characters converted.
  */
 static usize
-_doConvertFromInteger(u32 value,
+_doConvertFromInteger(u64 value,
                       char* buffer,
                       usize length,
                       u8 base,
                       bool capitalized)
 {
-    char* p = buffer;
-    int place;
-    do {
-        if (usize(p - buffer) >= length) {
-            break;
-        }
-        place = value % base;
-        value /= base;
-        *p++ = (place < 10) ? place + '0' : (place - 10) + (capitalized ? 'A' : 'a');
-    } while (value != 0);
+    static const char* digitsLower = "0123456789abcdefghijklmnopqrstuvwxyz";
+    static const char* digitsUpper = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    return p - buffer;
+    const char* digits = capitalized ? digitsUpper : digitsLower;
+
+    if (length == 0) {
+        return 0;
+    }
+    if (value == 0) {
+        buffer[0] = digits[0];
+        return 1;
+    }
+
+    u8 place;
+    usize i;
+    for (i = 0; i < length && value != 0; i++) {
+        place = value % base;
+        buffer[i] = digits[place];
+        value /= base;
+    }
+    return i;
 }
 
-char*
-fromInteger(i32 value,
+
+usize
+fromInteger(i64 value,
             char* buffer,
             usize length,
             u8 base,
             bool capitalized)
 {
+    if (base < 2 || base > 36) {
+        return 0;
+    }
+
     const bool negative = base == 10 && value < 0;
     if (negative) {
         value *= -1;
     }
 
-    usize convertedLength = _doConvertFromInteger(u32(value), buffer, length, base, capitalized);
+    usize convertedLength  = _doConvertFromInteger(value, buffer, length, base, capitalized);
 
     if (convertedLength < length && negative) {
         buffer[convertedLength++] = '-';
@@ -121,72 +135,27 @@ fromInteger(i32 value,
 
     reverse(buffer, convertedLength);
 
-    return buffer;
+    return convertedLength;
 }
 
 
-char*
-fromUnsignedInteger(u32 value,
+usize
+fromUnsignedInteger(u64 value,
                     char* buffer,
                     usize length,
                     u8 base,
                     bool capitalized)
 {
-    usize convertedLength = _doConvertFromInteger(u32(value), buffer, length, base, capitalized);
+    if (base < 2 || base > 36) {
+        return 0;
+    }
+
+    usize convertedLength = _doConvertFromInteger(value, buffer, length, base, capitalized);
     if (convertedLength < length) {
         buffer[convertedLength] = '\0';
     }
     reverse(buffer, convertedLength);
-    return buffer;
-}
-
-
-char*
-fromLongInteger(i64 value,
-                char* buffer,
-                usize length,
-                u8 base,
-                bool capitalized)
-{
-    const bool negative = base == 10 && value < 0;
-    if (negative) {
-        value *= -1;
-    }
-
-    // Do large ints in two passes. First do the high-order bits, then the lower order bits.
-    usize convertedLength;
-    convertedLength  = _doConvertFromInteger(u32(value >> 32), buffer, length, base, capitalized);
-    convertedLength += _doConvertFromInteger(u32(value), &buffer[convertedLength], length - convertedLength, base, capitalized);
-
-    if (convertedLength < length && negative) {
-        buffer[convertedLength++] = '-';
-    }
-    if (convertedLength < length) {
-        buffer[convertedLength] = '\0';
-    }
-
-    reverse(buffer, convertedLength);
-
-    return buffer;
-}
-
-
-char*
-fromUnsignedLongInteger(u64 value,
-                        char* buffer,
-                        usize length,
-                        u8 base,
-                        bool capitalized)
-{
-    // Do large ints in two passes. First do the high-order bits, then the lower order bits.
-    usize convertedLength;
-    convertedLength  = _doConvertFromInteger(u32(value >> 32), buffer, length, base, capitalized);
-    convertedLength += _doConvertFromInteger(u32(value), &buffer[convertedLength], length - convertedLength, base, capitalized);
-    if (convertedLength < length) {
-        buffer[convertedLength] = '\0';
-    }
-    reverse(buffer, convertedLength);
-    return buffer;
+    return convertedLength;
 }
 
 

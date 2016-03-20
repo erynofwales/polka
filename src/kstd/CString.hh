@@ -34,19 +34,18 @@ void uppercase(char *str);
  */
 
 /**
- * Convert a signed integer to a string.
+ * Convert an integer to a string.
  *
  * @param [in]     value   The value to convert
  * @param [in,out] buffer  Buffer to write to
  * @param [in]     length  Length of the buffer
  * @param [in]     base    Base to convert to. Default is base 10.
  * @param [in]     capitalized  Should the alphabetic digits be capitalized? Default is false.
+ * @return Number of bytes converted.
  * @{
  */
-char* fromInteger(i32 value, char* buffer, usize length, u8 base = 10, bool capitalized = false);
-char* fromUnsignedInteger(u32 value, char* buffer, usize length, u8 base = 10, bool capitalized = false);
-char* fromLongInteger(i64 value, char* buffer, usize length, u8 base = 10, bool capitalized = false);
-char* fromUnsignedLongInteger(u64 value, char* buffer, usize length, u8 base = 10, bool capitalized = false);
+usize fromInteger(i64 value, char* buffer, usize length, u8 base = 10, bool capitalized = false);
+usize fromUnsignedInteger(u64 value, char* buffer, usize length, u8 base = 10, bool capitalized = false);
 /** @} */
 
 /** Convert a bool to a string. */
