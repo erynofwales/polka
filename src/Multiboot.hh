@@ -73,8 +73,7 @@ private:
      * Indicates which BIOS disk the boot loader loaded the OS image from.
      * Defined only if `bootDevice == true`.
      */
-    struct PACKED
-    {
+    struct PACKED {
         /** Third level partition number. If unused this is set to 0xFF. */
         uint8_t partitionLevel3;
         /** Sub-partition number. If unused this is set to 0xFF. */
@@ -98,8 +97,7 @@ private:
      * Indicates what boot modules were loaded along with the kernel image.
      * Defined only if `modulesPresent == true`.
      */
-    struct PACKED
-    {
+    struct PACKED {
         /** Number of boot modules present. */
         uint32_t count;
         /** Pointer to start of boot modules array. */
@@ -109,16 +107,13 @@ private:
     // TODO: Document these.
     union PACKED
     {
-        struct PACKED
-        {
+        struct PACKED {
             uint32_t tableSize;
             uint32_t stringSize;
             uint32_t address;
             uint32_t reserved;
         } aout;
-
-        struct PACKED
-        {
+        struct PACKED {
             uint32_t number;
             uint32_t size;
             uint32_t address;
@@ -142,8 +137,7 @@ private:
      * Points to a buffer containing a list of drive definitions provided by the
      * BIOS. Defined only if `drivesPresent == true`.
      */
-    struct PACKED
-    {
+    struct PACKED {
         /** Number of memory map entries present. */
         uint32_t count;
         /** Pointer to start of memory map entry array. */
