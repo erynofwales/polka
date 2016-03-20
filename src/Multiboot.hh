@@ -61,10 +61,7 @@ struct PACKED Information
     MemoryMapIterator memoryMapEnd() const;
 
 private:
-    /**
-     * Bit field of flags. Fields below are only defined if the appropriate
-     * flag is set.
-     */
+    /** Bit field of flags. Fields below are only defined if the appropriate flag is set. */
     uint32_t mFlags;
 
     /** Amount of lower (0 to 1 MB) memory, in KB. */
