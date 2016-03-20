@@ -1,5 +1,5 @@
 /* Multiboot.hh
- * vim: set tw=80:
+ * vim: set tw=120:
  * Eryn Wells <eryn@erynwells.me>
  */
 /**
@@ -44,8 +44,8 @@ struct PACKED Information
         bool operator!=(const MemoryMapIterator& other) const;
 
     private:
-        MemoryChunk *mCurrent;
-        uint32_t mCount;
+        uint32_t mCurrent;
+        uint32_t mLength;
     };
 
     static const Information *information();
@@ -56,7 +56,6 @@ struct PACKED Information
 
     const char* commandLine() const;
 
-    uint32_t memoryMapChunks() const;
     MemoryMapIterator memoryMapBegin() const;
     MemoryMapIterator memoryMapEnd() const;
 
@@ -69,10 +68,7 @@ private:
     /** Amount of upper (1 MB to ...) memory, in KB. Maximally, this value is the address of the first upper memory hole, minus 1 MB. */
     uint32_t mMemUpper;
 
-    /**
-     * Indicates which BIOS disk the boot loader loaded the OS image from.
-     * Defined only if `bootDevice == true`.
-     */
+    /** Indicates which BIOS disk the boot loader loaded the OS image from. */
     struct PACKED {
         /** Third level partition number. If unused this is set to 0xFF. */
         uint8_t partitionLevel3;
@@ -80,33 +76,27 @@ private:
         uint8_t partitionLevel2;
         /** Top-level partition number. */
         uint8_t partitionLevel1;
-        /**
-         * BIOS drive number, as returned by the `INT 0x13` low-level disk
-         * interface.
-         */
+        /** BIOS drive number, as returned by the `INT 0x13` low-level disk interface. */
         uint8_t driveNumber;
-    } bootDevice;
+    } mBootDevice;
 
-    /**
-     * Pointer to a C-style string containing the command line arguments.
-     * Defined only if `commandLinePresent == true`.
-     */
+    /** Pointer to a C-style string containing the command line arguments. */
     uint32_t mCommandLine;
 
     /**
+     * Multiboot Modules
      * Indicates what boot modules were loaded along with the kernel image.
      * Defined only if `modulesPresent == true`.
+     * @{
      */
-    struct PACKED {
-        /** Number of boot modules present. */
-        uint32_t count;
-        /** Pointer to start of boot modules array. */
-        uint32_t address;
-    } modules;
+    /** Number of boot modules present. */
+    uint32_t mModulesCount;
+    /** Pointer to start of boot modules array. */
+    uint32_t mModulesAddress;
+    /** @} */
 
     // TODO: Document these.
-    union PACKED
-    {
+    union PACKED {
         struct PACKED {
             uint32_t tableSize;
             uint32_t stringSize;
@@ -117,42 +107,36 @@ private:
             uint32_t number;
             uint32_t size;
             uint32_t address;
-            uint32_t shndx;
+            uint32_t shndx; // TODO: Bad name. What is this?
         } elf;
     } symbols;
 
     /**
      * @defgroup Memory Map
-     * Points to a buffer containing a memory map of the machine provided by the
-     * BIOS. Defined only if `memoryMapPresent == true`.
+     * Defines a buffer containing a memory map provided by the BIOS.
      * @{
      */
-    /** Number of memory map entries present. */
-    uint32_t memoryMapCount;
+    /** Length of the buffer, in bytes. The spec is somewhat unclear on this field. */
+    uint32_t mMemoryMapLength;
     /** Pointer to start of memory map entry array. */
-    uint32_t memoryMapAddress;
+    uint32_t mMemoryMapAddress;
     /** @} */
 
     /**
-     * Points to a buffer containing a list of drive definitions provided by the
-     * BIOS. Defined only if `drivesPresent == true`.
+     * @defgroup Drives
+     * Defines a buffer containing a list of drive definitions provided by the BIOS.
+     * @{
      */
-    struct PACKED {
-        /** Number of memory map entries present. */
-        uint32_t count;
-        /** Pointer to start of memory map entry array. */
-        uint32_t address;
-    } drives;
+    /** Number of memory map entries present. */
+    uint32_t mDrivesLength;
+    /** Pointer to start of memory map entry array. */
+    uint32_t mDrivesAddress;
+    /** @} */
 
-    /**
-     * Pointer to the table containing APM information. Defined only if
-     * `apmTablePresent == true`.
-     */
-    uint32_t apmTable;
+    /** Pointer to a table containing APM information. */
+    uint32_t mAPMTable;
 
-    /**
-     * I dunno some VBE stuff. TODO.
-     */
+    /** I dunno some VBE stuff. TODO. */
     struct PACKED {
         uint32_t controlInformation;
         uint32_t modeInformation;

@@ -53,35 +53,35 @@ Information::setInformation(Information *info)
  */
 
 Information::MemoryMapIterator::MemoryMapIterator(uint32_t address,
-                                                  uint32_t count)
-    : mCurrent(reinterpret_cast<MemoryChunk *>(address)),
-      mCount(count)
+                                                  uint32_t length)
+    : mCurrent(address),
+      mLength(length)
 { }
 
 
 Information::MemoryMapIterator::MemoryMapIterator(const MemoryMapIterator& other)
     : mCurrent(other.mCurrent),
-      mCount(other.mCount)
+      mLength(other.mLength)
 { }
 
 
 Information::MemoryMapIterator&
 Information::MemoryMapIterator::operator++()
 {
-    if (mCount > 0) {
-        auto p = reinterpret_cast<uint32_t *>(mCurrent);
+    if (mLength > 0) {
         // The size of the current struct is stored at (mCurrent - 4) bytes.
-        mCurrent = (mCurrent + p[-1]);
-        mCount--;
+        auto size = *reinterpret_cast<uint32_t*>(mCurrent) + 4;
+        mCurrent = mCurrent + size;
+        mLength = (size > mLength) ? 0 : mLength - size;
     }
-    return *this; 
+    return *this;
 }
 
 
 Information::MemoryMapIterator
 Information::MemoryMapIterator::operator++(int)
 {
-    MemoryMapIterator tmp(reinterpret_cast<uint32_t>(mCurrent), mCount);
+    MemoryMapIterator tmp(mCurrent, mLength);
     operator++();
     return tmp;
 }
@@ -90,10 +90,7 @@ Information::MemoryMapIterator::operator++(int)
 MemoryChunk
 Information::MemoryMapIterator::operator*()
 {
-    if (mCount == 0) {
-        return MemoryChunk{0, 0, 0};
-    }
-    return *mCurrent;
+    return *reinterpret_cast<MemoryChunk*>(mCurrent+4);
 }
 
 
@@ -101,11 +98,11 @@ bool
 Information::MemoryMapIterator::operator==(const MemoryMapIterator& other)
     const
 {
-    if (mCount == 0 && other.mCount == 0) {
+    if (mLength == 0 && other.mLength == 0) {
         // If both iterators have 0 counts, it doesn't matter what the mCurrent members point at.
         return true;
     }
-    return mCurrent == other.mCurrent && mCount == other.mCount;
+    return mCurrent == other.mCurrent && mLength == other.mLength;
 }
 
 
@@ -150,17 +147,6 @@ Information::commandLine()
 }
 
 
-uint32_t
-Information::memoryMapChunks()
-    const
-{
-    if ((mFlags & Present::MemoryMap) == 0) {
-        return 0;
-    }
-    return memoryMapCount;
-}
-
-
 Information::MemoryMapIterator
 Information::memoryMapBegin()
     const
@@ -168,7 +154,8 @@ Information::memoryMapBegin()
     if ((mFlags & Present::MemoryMap) == 0) {
         return memoryMapEnd();
     }
-    return MemoryMapIterator(memoryMapAddress, memoryMapCount);
+    auto& console = kernel::Console::systemConsole();
+    return MemoryMapIterator(mMemoryMapAddress, mMemoryMapLength);
 }
 
 
@@ -178,5 +165,5 @@ Information::memoryMapEnd()
 {
     return {0, 0};
 }
-    
+
 } /* namespace multiboot */
