@@ -154,7 +154,6 @@ Information::memoryMapBegin()
     if ((mFlags & Present::MemoryMap) == 0) {
         return memoryMapEnd();
     }
-    auto& console = kernel::Console::systemConsole();
     return MemoryMapIterator(mMemoryMapAddress, mMemoryMapLength);
 }
 
