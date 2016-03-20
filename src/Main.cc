@@ -53,7 +53,14 @@ kmain(multiboot::Information *information)
 
     console.printFormat("Memory map:\n");
     console.printFormat("  available: lower = %ld KB, upper = %ld KB\n", info->lowerMemoryKB(), info->upperMemoryKB());
-    // TODO: Print memory map, after determining that the info struct is correct.
+    for (auto it = info->memoryMapBegin(); it != info->memoryMapEnd(); ++it) {
+        auto begin = (*it).base;
+        auto end = begin + (*it).length - 1;
+        console.printFormat("  begin = 0x%08lX %08lX, end = 0x%08lX %08lX (%s)\n",
+                            uint32_t(begin >> 32), uint32_t(begin & 0xFFFFFFFF),
+                            uint32_t(end >> 32), uint32_t(end & 0xFFFFFFFF),
+                            (*it).type == 1 ? "available" : "reserved");
+    }
 
     auto& gdt = x86::GDT::systemGDT();
     gdt.setNullDescriptor(0);
