@@ -10,48 +10,54 @@
 #include "Console.hh"
 #include "kstd/ASCII.hh"
 #include "kstd/CString.hh"
+#include "kstd/Types.hh"
 
 namespace {
 
 void itoa(int value, char* buffer, int base);
 
-struct PrintfSpec
-{
-    enum Size {
-        SizeNormal,
-        SizeDoubleShort,
-        SizeShort,
-        SizeLong,
-        SizeDoubleLong,
+struct Spec {
+    enum class Size {
+        Normal,
+        DoubleShort,
+        Short,
+        Long,
+        DoubleLong,
     };
 
-    enum Type {
-        TypeInt,
-        TypeHex,
-        TypeChar,
-        TypeString
+    enum class Type {
+        Int,
+        Unsigned,
+        Hex,
+        Char,
+        String
     };
 
-    union Value {
-        int d;
-        char hhd;
-        short int hd;
-        long int ld;
-        long long int lld;
-        unsigned int x;
-        unsigned char hhx;
-        unsigned short int hx;
-        unsigned long int lx;
-        unsigned long long int llx;
-        char c;
-        char* s;
-    };
-
-    bool zero;
+    bool zeroPadded;
+    bool capitalized;
     int width;
     Size size;
     Type type;
-    Value value;
+
+    union Value {
+        i8 hhd;
+        i16 hd;
+        i32 d;
+        i64 ld;
+        i64 lld;
+        u8 hhu;
+        u16 hu;
+        u32 u;
+        u64 lu;
+        u64 llu;
+        u8 hhx;
+        u16 hx;
+        u32 x;
+        u64 lx;
+        u64 llx;
+        char c;
+        char* s;
+    } value;
 
     void clear();
     int print(kernel::Console& console);
@@ -59,17 +65,19 @@ struct PrintfSpec
 
 
 void
-PrintfSpec::clear()
+Spec::clear()
 {
-    zero = false;
+    zeroPadded = false;
+    capitalized = false;
     width = 0;
-    size = PrintfSpec::SizeNormal;
-    type = PrintfSpec::TypeInt;
+    size = Size::Normal;
+    type = Type::Int;
+    value.llx = 0;
 }
 
 
 int
-PrintfSpec::print(kernel::Console& console)
+Spec::print(kernel::Console& console)
 {
     int nchars = 0;
     int length = 0;
@@ -81,7 +89,7 @@ PrintfSpec::print(kernel::Console& console)
      * TypeChar is a special case because it will always be a single character
      * in length and there is no \0 to terminate it.
      */
-    if (type == TypeChar) {
+    if (type == Type::Char) {
         if (width == 0) {
             width = 1;
         }
@@ -92,53 +100,53 @@ PrintfSpec::print(kernel::Console& console)
         return width;
     }
 
-    if (type == TypeInt || type == TypeHex) {
-        if (zero) {
+    if (type == Type::Int || type == Type::Hex) {
+        if (zeroPadded) {
             pad = '0';
         }
-        if (type == TypeInt) {
+        if (type == Type::Int) {
             switch (size) {
-                case SizeNormal:
+                case Size::Normal:
                     itoa(value.d, buf, 10);
                     break;
-                case SizeDoubleShort:
+                case Size::DoubleShort:
                     itoa(value.hhd, buf, 10);
                     break;
-                case SizeShort:
+                case Size::Short:
                     itoa(value.hd, buf, 10);
                     break;
-                case SizeLong:
+                case Size::Long:
                     itoa(value.ld, buf, 10);
                     break;
-                case SizeDoubleLong:
+                case Size::DoubleLong:
                     itoa(value.lld, buf, 10);
                     break;
             }
         } else {
             switch (size) {
-                case SizeNormal:
-                    itoa(value.x, buf, 16);
+                case Size::Normal:
+                    kstd::CString::fromUnsignedInteger(value.x, buf, 16, capitalized);
                     break;
-                case SizeDoubleShort:
-                    itoa(value.hhx, buf, 16);
+                case Size::DoubleShort:
+                    kstd::CString::fromUnsignedInteger(value.hhx, buf, 16, capitalized);
                     break;
-                case SizeShort:
-                    itoa(value.hx, buf, 16);
+                case Size::Short:
+                    kstd::CString::fromUnsignedInteger(value.hx, buf, 16, capitalized);
                     break;
-                case SizeLong:
-                    itoa(value.lx, buf, 16);
+                case Size::Long:
+                    kstd::CString::fromUnsignedLongInteger(value.lx, buf, 16, capitalized);
                     break;
-                case SizeDoubleLong:
-                    itoa(value.llx, buf, 16);
+                case Size::DoubleLong:
+                    kstd::CString::fromUnsignedLongInteger(value.llx, buf, 16, capitalized);
                     break;
             }
         }
-        length = kstd::CString::length(buf);
+        length = kstd::CString::length(buf, 32);
         if (width < length) {
             width = length;
         }
         str = buf;
-    } else if (type == TypeString) {
+    } else if (type == Type::String) {
         length = kstd::CString::length(value.s);
         if (width < length) {
             width = length;
@@ -172,14 +180,15 @@ itoa(int value,
     if (neg) {
         value *= -1;
     }
+    unsigned int v = (unsigned int)value;
 
     char* p = buffer;
     int place;
     do {
-        place = value % base;
-        value /= base;
+        place = v % base;
+        v /= base;
         *p++ = place < 10 ? place + '0' : (place - 10) + 'a';
-    } while (value != 0);
+    } while (v != 0);
 
     if (neg) {
         *p++ = '-';
@@ -220,39 +229,39 @@ Console::printFormat(const char* fmt,
                      ...)
 {
     enum {
-        StateDefault = 0,
-        StatePercent,
-        StateWidth,
-        StateSize
-    } state = StateDefault;
+        Default = 0,
+        Percent,
+        Width,
+        Size
+    } state = Default;
 
     va_list vl;
     va_start(vl, fmt);
 
     int nchars = 0;
-    PrintfSpec spec;
+    Spec spec;
 
     for (const char* p = fmt; *p != 0; p++) {
         switch (state) {
-            case StateDefault:
+            case Default:
                 if (*p == '%') {
-                    state = StatePercent;
+                    state = Percent;
                     spec.clear();
                 } else {
                     printChar(*p);
                     nchars++;
                 }
                 break;
-            case StatePercent:
+            case Percent:
                 if (*p == '%') {
-                    state = StateDefault;
+                    state = Default;
                     printChar(*p);
                     nchars++;
                 } else if (kstd::Char::isDigit(*p)) {
-                    if (*p == '0' && !spec.zero) {
-                        spec.zero = true;
+                    if (*p == '0' && !spec.zeroPadded) {
+                        spec.zeroPadded = true;
                     } else {
-                        state = StateWidth;
+                        state = Width;
                         spec.width = *p - '0';
                     }
                 } else if (is_size(*p)) {
@@ -261,17 +270,17 @@ Console::printFormat(const char* fmt,
                     goto state_specifier;
                 }
                 break;
-            case StateWidth:
+            case Width:
                 if (kstd::Char::isDigit(*p)) {
                     spec.width = 10 * spec.width + (*p - '0');
                 } else if (is_size(*p)) {
-                    state = StateSize;
+                    state = Size;
                     goto state_size;
                 } else if (is_specifier(*p)) {
                     goto state_specifier;
                 }
                 break;
-            case StateSize:
+            case Size:
                 if (is_size(*p)) {
                     goto state_size;
                 } else if (is_specifier(*p)) {
@@ -287,68 +296,68 @@ Console::printFormat(const char* fmt,
 
     state_size:
         if (*p == 'h') {
-            spec.size =   (spec.size == PrintfSpec::SizeShort)
-                        ? PrintfSpec::SizeDoubleShort
-                        : PrintfSpec::SizeShort;
+            spec.size =   (spec.size == Spec::Size::Short)
+                        ? Spec::Size::DoubleShort
+                        : Spec::Size::Short;
         } else if (*p == 'l') {
-            spec.size =   (spec.size == PrintfSpec::SizeLong)
-                        ? PrintfSpec::SizeDoubleLong
-                        : PrintfSpec::SizeLong;
+            spec.size =   (spec.size == Spec::Size::Long)
+                        ? Spec::Size::DoubleLong
+                        : Spec::Size::Long;
         }
         continue;
 
     state_specifier:
-        state = StateDefault;
+        state = Default;
         switch (*p) {
             case 'd':
             case 'i':
                 switch (spec.size) {
-                    case PrintfSpec::SizeNormal:
+                    case Spec::Size::Normal:
                         spec.value.d = va_arg(vl, int);
                         break;
-                    case PrintfSpec::SizeDoubleShort:
+                    case Spec::Size::DoubleShort:
                         spec.value.hhd = (signed char)va_arg(vl, int);
                         break;
-                    case PrintfSpec::SizeShort:
+                    case Spec::Size::Short:
                         spec.value.hd = (short int)va_arg(vl, int);
                         break;
-                    case PrintfSpec::SizeLong:
+                    case Spec::Size::Long:
                         spec.value.ld = va_arg(vl, long int);
                         break;
-                    case PrintfSpec::SizeDoubleLong:
+                    case Spec::Size::DoubleLong:
                         spec.value.lld = va_arg(vl, long long int);
                         break;
                 }
-                spec.type = PrintfSpec::TypeInt;
+                spec.type = Spec::Type::Int;
                 break;
             case 'x':
             case 'X':
                 switch (spec.size) {
-                    case PrintfSpec::SizeNormal:
+                    case Spec::Size::Normal:
                         spec.value.x = va_arg(vl, unsigned int);
                         break;
-                    case PrintfSpec::SizeDoubleShort:
+                    case Spec::Size::DoubleShort:
                         spec.value.hhx = (unsigned char)va_arg(vl, unsigned int);
                         break;
-                    case PrintfSpec::SizeShort:
+                    case Spec::Size::Short:
                         spec.value.hx = (unsigned short int)va_arg(vl, unsigned int);
                         break;
-                    case PrintfSpec::SizeLong:
+                    case Spec::Size::Long:
                         spec.value.lx = va_arg(vl, unsigned long int);
                         break;
-                    case PrintfSpec::SizeDoubleLong:
+                    case Spec::Size::DoubleLong:
                         spec.value.llx = va_arg(vl, unsigned long long int);
                         break;
                 }
-                spec.type = PrintfSpec::TypeHex;
+                spec.type = Spec::Type::Hex;
                 break;
             case 'c':
                 spec.value.c = va_arg(vl, int);
-                spec.type = PrintfSpec::TypeChar;
+                spec.type = Spec::Type::Char;
                 break;
             case 's':
                 spec.value.s = va_arg(vl, char*);
-                spec.type = PrintfSpec::TypeString;
+                spec.type = Spec::Type::String;
                 break;
         }
         nchars += spec.print(*this);
