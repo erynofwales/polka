@@ -23,6 +23,9 @@ files = [
 ]
 
 toolchain_bin = Dir(os.environ['POLKA_TOOLCHAIN']).Dir('bin')
+toolchain_gcc_lib = Dir(os.environ['POLKA_TOOLCHAIN']).Dir('lib/gcc/i686-elf/5.3.0')
+linker_script = File('linker.ld')
+
 env.Replace(AS=toolchain_bin.File('i686-elf-as'),
             CC=toolchain_bin.File('i686-elf-gcc'),
             CXX=toolchain_bin.File('i686-elf-g++'),
@@ -30,7 +33,8 @@ env.Replace(AS=toolchain_bin.File('i686-elf-as'),
 env.Append(CCFLAGS='-ffreestanding',
            CPPDEFINES='__polka',
            CXXFLAGS='-fno-exceptions -fno-rtti',
-           LINKFLAGS='-nostdlib -lgcc')
+           LIBPATH=[toolchain_gcc_lib],
+           LINKFLAGS='-nostdlib -T{}'.format(linker_script.path))
 
 # Global constructor files. These must be linked IN THIS ORDER.
 def crtfile_path(name):
@@ -42,8 +46,7 @@ crtend_file = Command('crtend.o', [], Copy('$TARGET', crtfile_path('crtend.o')))
 crtinit_files = ['crti.s', crtbegin_file]
 crtfini_files = [crtend_file, 'crtn.s']
 
-linker_script = File('linker.ld')
-kernel = Program('polka.bin', crtinit_files + files + crtfini_files, LINKFLAGS='-T {}'.format(linker_script.path))
+kernel = Program('polka.bin', crtinit_files + files + crtfini_files, LIBS=['gcc'])
 Depends(kernel, linker_script)
 Alias('kernel', kernel)
 
