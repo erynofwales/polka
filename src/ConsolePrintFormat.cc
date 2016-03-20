@@ -14,8 +14,6 @@
 
 namespace {
 
-void itoa(int value, char* buffer, int base);
-
 struct Spec {
     enum class Size {
         Normal,
@@ -107,41 +105,40 @@ Spec::print(kernel::Console& console)
         if (type == Type::Int) {
             switch (size) {
                 case Size::Normal:
-                    itoa(value.d, buf, 10);
+                    length = kstd::CString::fromInteger(value.d, buf, 32);
                     break;
                 case Size::DoubleShort:
-                    itoa(value.hhd, buf, 10);
+                    length = kstd::CString::fromInteger(value.hhd, buf, 32);
                     break;
                 case Size::Short:
-                    itoa(value.hd, buf, 10);
+                    length = kstd::CString::fromInteger(value.hd, buf, 32);
                     break;
                 case Size::Long:
-                    itoa(value.ld, buf, 10);
+                    length = kstd::CString::fromInteger(value.ld, buf, 32);
                     break;
                 case Size::DoubleLong:
-                    itoa(value.lld, buf, 10);
+                    length = kstd::CString::fromInteger(value.lld, buf, 32);
                     break;
             }
         } else {
             switch (size) {
                 case Size::Normal:
-                    kstd::CString::fromUnsignedInteger(value.x, buf, 16, capitalized);
+                    length = kstd::CString::fromUnsignedInteger(value.x, buf, 32, 16, capitalized);
                     break;
                 case Size::DoubleShort:
-                    kstd::CString::fromUnsignedInteger(value.hhx, buf, 16, capitalized);
+                    length = kstd::CString::fromUnsignedInteger(value.hhx, buf, 32, 16, capitalized);
                     break;
                 case Size::Short:
-                    kstd::CString::fromUnsignedInteger(value.hx, buf, 16, capitalized);
+                    length = kstd::CString::fromUnsignedInteger(value.hx, buf, 32, 16, capitalized);
                     break;
                 case Size::Long:
-                    kstd::CString::fromUnsignedLongInteger(value.lx, buf, 16, capitalized);
+                    length = kstd::CString::fromUnsignedInteger(value.lx, buf, 32, 16, capitalized);
                     break;
                 case Size::DoubleLong:
-                    kstd::CString::fromUnsignedLongInteger(value.llx, buf, 16, capitalized);
+                    length = kstd::CString::fromUnsignedInteger(value.llx, buf, 32, 16, capitalized);
                     break;
             }
         }
-        length = kstd::CString::length(buf, 32);
         if (width < length) {
             width = length;
         }
@@ -167,43 +164,6 @@ Spec::print(kernel::Console& console)
     }
 
     return nchars;
-}
-
-
-void
-itoa(int value,
-     char* buffer,
-     int base)
-{
-    const bool neg = base == 10 && value < 0;
-
-    if (neg) {
-        value *= -1;
-    }
-    unsigned int v = (unsigned int)value;
-
-    char* p = buffer;
-    int place;
-    do {
-        place = v % base;
-        v /= base;
-        *p++ = place < 10 ? place + '0' : (place - 10) + 'a';
-    } while (v != 0);
-
-    if (neg) {
-        *p++ = '-';
-    }
-
-    *p-- = '\0';
-
-    // Reverse the string.
-    char* t = buffer;
-    char c;
-    while (p > t) {
-        c = *p;
-        *p-- = *t;
-        *t++ = c;
-    }
 }
 
 
