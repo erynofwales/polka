@@ -44,11 +44,7 @@ kmain(multiboot::Information *information)
     multiboot::Information::setInformation(information);
     auto info = multiboot::Information::information();
 
-    // Reinitialize the system console now that we have global static objects.
-    auto& console = kernel::Console::systemConsole();
-    console.clear(kernel::Console::Color::Blue);
-
-    console.printString("Loading Polka ...\n");
+    kernel::Kernel::systemKernel().initialize();
 
     console.printFormat("Command line: \"%s\"\n", info->commandLine());
 

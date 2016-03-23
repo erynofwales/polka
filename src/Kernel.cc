@@ -31,11 +31,28 @@ Kernel::systemKernel()
  * Public
  */
 
+Kernel::Kernel()
+    : mConsole()
+{ }
+
+
+void
+Kernel::initialize()
+{
+    mConsole.clear(kernel::Console::Color::Blue);
+    mConsole.printString("Loading Polka...\n");
+}
+
+
 void
 Kernel::panic(const char* msg,
               ...)
 {
-
+    mConsole.clear(Console::Color::Magenta);
+    mConsole.printString("PANIC! PANIC! PANIC! :-(\n");
+    mConsole.printString(msg);
+    // TODO: Dump registers.
+    halt();
 }
 
 /*
