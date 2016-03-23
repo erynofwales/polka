@@ -22,19 +22,6 @@
 #error "This file should be compiled with an ix86-elf compiler!"
 #endif
 
-/** Called very early, before global initialization. */
-extern "C"
-void
-kearly()
-{
-    using kernel::Console;
-
-    // Create a console object for early use because global initialization hasn't happened yet.
-    Console console;
-    console.clear(kernel::Console::Color::Blue);
-    console.printString("Loading system ...\n");
-}
-
 
 /** The beginning of the world... */
 extern "C"
