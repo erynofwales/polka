@@ -9,21 +9,23 @@
 #ifndef __MEMORY_HH__
 #define __MEMORY_HH__
 
+#include "Types.hh"
+
 namespace kstd {
 namespace Memory {
 
 /** Copy `length` bytes from `from` to `to`. */
-void *copy(void *to, const void *from, size_t length);
+void* copy(void* to, const void* from, usize length);
 
 /** Move `length` bytes from `from` to `to`. */
-void *move(void *to, const void *from, size_t length);
+void* move(void* to, const void* from, usize length);
 
 /** Set `length` bytes starting at `s` to zero. */
-void *zero(void *s, size_t length);
+void* zero(void* s, usize length);
 
 /** Set `length` bytes starting at `s` to `value`. */
-void *set(void *s, uint8_t value, size_t length); 
-    
+void* set(void* s, u8 value, usize length);
+
 } /* namespace Memory */
 } /* namespace kstd */
 
