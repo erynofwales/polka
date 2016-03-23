@@ -14,6 +14,7 @@ files = [
     'ConsolePrintFormat.cc',
     'Descriptors.cc',
     'Interrupts.cc',
+    'Kernel.cc',
     'Multiboot.cc',
     'PIC.cc',
     'cxa.cc',

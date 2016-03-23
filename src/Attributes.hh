@@ -13,5 +13,6 @@
 #define __ATTRIBUTES_HH__
 
 #define PACKED __attribute__((packed))
+#define NORETURN __attribute((noreturn))
 
 #endif /* __ATTRIBUTES_HH__ */

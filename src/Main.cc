@@ -10,6 +10,7 @@
 #include "Console.hh"
 #include "Descriptors.hh"
 #include "Interrupts.hh"
+#include "Kernel.hh"
 #include "Multiboot.hh"
 #include "kstd/Types.hh"
 
@@ -74,5 +75,5 @@ kmain(multiboot::Information *information)
     interruptHandler.enableInterrupts();
     console.printString("Interrupts enabled\n");
 
-    for (;;) { }
+    kernel::Kernel::systemKernel()->halt();
 }
