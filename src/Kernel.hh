@@ -27,6 +27,8 @@ struct Kernel
 
     void halt() NORETURN;
 
+    Console& console();
+
 private:
     Console mConsole;
 };

@@ -12,7 +12,7 @@
 namespace {
 
 static kernel::Kernel sKernel;
-    
+
 } /* anonymous namespace */
 
 namespace kernel {
@@ -53,6 +53,12 @@ Kernel::panic(const char* msg,
     mConsole.printString(msg);
     // TODO: Dump registers.
     halt();
+}
+
+Console&
+Kernel::console()
+{
+    return mConsole;
 }
 
 /*

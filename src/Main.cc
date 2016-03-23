@@ -32,7 +32,10 @@ kmain(multiboot::Information *information,
     multiboot::Information::setInformation(information);
     auto info = multiboot::Information::information();
 
-    kernel::Kernel::systemKernel().initialize();
+    auto& kernel = kernel::Kernel::systemKernel();
+    kernel.initialize();
+
+    auto& console = kernel.console();
 
     console.printFormat("Command line: \"%s\"\n", info->commandLine());
 
