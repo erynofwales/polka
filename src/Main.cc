@@ -39,7 +39,8 @@ kearly()
 /** The beginning of the world... */
 extern "C"
 void
-kmain(multiboot::Information *information)
+kmain(multiboot::Information *information,
+      u32 magic)
 {
     multiboot::Information::setInformation(information);
     auto info = multiboot::Information::information();

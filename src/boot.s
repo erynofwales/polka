@@ -36,26 +36,15 @@ _start:
     movl $stack_top, %esp
     movl %esp, %ebp
 
-    # Very early initialization done here.
-    call kearly
+    # Push the multiboot parameters before calling anything else. These will get passed to kmain.
+    pushl %eax
+    pushl %ebx
 
     # Global initialization done here.
     call _init
 
-    # Here we go... Give kmain the address of the multiboot info structure.
-    pushl %ebx
+    # Here we go! This will never return.
     call kmain
-
-    # In case the function returns, we'll want to put the computer into an
-    # infinite loop. To do that, we use the clear interrupt ('cli') instruction
-    # to disable interrupts, the halt instruction ('hlt') to stop the CPU until
-    # the next interrupt arrives, and jumping to the halt instruction if it ever
-    # continues execution, just to be safe. We will create a local label rather
-    # than real symbol and jump to there endlessly.
-    cli
-.Lhang:
-    hlt
-    jmp .Lhang
 
 # Set the size of the _start symbol to the current location '.' minus its start.
 # This is useful when debugging or when you implement call tracing.
