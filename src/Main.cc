@@ -75,5 +75,5 @@ kmain(multiboot::Information *information)
     interruptHandler.enableInterrupts();
     console.printString("Interrupts enabled\n");
 
-    kernel::Kernel::systemKernel()->halt();
+    kernel::Kernel::systemKernel().halt();
 }

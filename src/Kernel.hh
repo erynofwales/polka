@@ -16,7 +16,7 @@ namespace kernel {
 
 struct Kernel
 {
-    static Kernel* systemKernel();
+    static Kernel& systemKernel();
 
     void panic(const char* msg, ...);
 

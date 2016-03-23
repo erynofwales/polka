@@ -21,10 +21,10 @@ namespace kernel {
  * Static
  */
 
-Kernel*
+Kernel&
 Kernel::systemKernel()
 {
-    return &sKernel;
+    return sKernel;
 }
 
 /*
