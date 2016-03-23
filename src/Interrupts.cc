@@ -9,6 +9,8 @@
 #include "Interrupts.hh"
 #include "Console.hh"
 #include "IO.hh"
+#include "Kernel.hh"
+
 
 extern "C" {
     // Assembly functions. See isr.S.
@@ -20,6 +22,33 @@ extern "C" {
     void handleHardwareInterrupt0();
     void handleHardwareInterrupt1();
 }
+
+namespace  {
+
+static const char* sExceptionIdentifiers[] = {
+    "#DE",
+    "#DB",
+    "NMI",
+    "#BP",
+    "#OF",
+    "#BR",
+    "#UD",
+    "#NM",
+    "#DF",
+    "Int9",
+    "#TS",
+    "#NP",
+    "#SS",
+    "#GP",
+    "#PF",
+    "#MF",
+    "#AC",
+    "#MC",
+    "#XM",
+    "#VE",
+};
+
+} /* anonymous namespace */
 
 namespace x86 {
 
@@ -95,28 +124,8 @@ InterruptHandler::disableInterrupts()
 void
 InterruptHandler::dispatchException(uint8_t exception)
 {
-    using x86::Interrupt;
-
-    auto& console = kernel::Console::systemConsole();
-    console.printString("Received exception ");
-    switch (Interrupt(exception)) {
-        case Interrupt::DE:
-            console.printString("#DE");
-            break;
-        case Interrupt::NMI:
-            console.printString("NMI");
-            break;
-        case Interrupt::DF:
-            console.printString("#DF");
-            break;
-        case Interrupt::GP:
-            console.printString("#GP");
-            break;
-        default:
-            console.printString("SOME OTHER THING");
-            break;
-    }
-    console.printString("\nAbort. :(");
+    auto& kernel = kernel::Kernel::systemKernel();
+    kernel.panic("Received %s exception.", sExceptionIdentifiers[exception]);
 }
 
 
@@ -130,9 +139,11 @@ InterruptHandler::dispatchHardwareInterrupt(uint8_t irq)
         case 1:
             doKeyboardInterrupt();
             break;
-        default:
-            // TODO: Implement a panic function...
+        default: {
+            auto& kernel = kernel::Kernel::systemKernel();
+            kernel.panic("Unhandled interrupt.");
             break;
+        }
     }
     finishHardwareInterrupt(irq);
 }
@@ -179,8 +190,8 @@ extern "C"
 void
 doUnhandledInterrupt()
 {
-    auto& console = kernel::Console::systemConsole();
-    console.printString("Received unhandled interrupt.\nAbort. :(");
+    auto& kernel = kernel::Kernel::systemKernel();
+    kernel.panic("Unhandled interrupt.");
 }
 
 
