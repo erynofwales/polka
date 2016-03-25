@@ -6,6 +6,7 @@
  * Kernel object. This is the highest level object in the system.
  */
 
+#include <stdarg.h>
 #include "Kernel.hh"
 #include "Interrupts.hh"
 
@@ -72,8 +73,14 @@ Kernel::panic(const char* msg,
 {
     mConsole.clear(Console::Color::Magenta);
     mConsole.printString("PANIC! PANIC! PANIC! :-(\n");
-    mConsole.printString(msg);
+
+    va_list args;
+    va_start(args, msg);
+    mConsole.printFormat(msg, args);
+    va_end(args);
+
     // TODO: Dump registers.
+
     halt();
 }
 
