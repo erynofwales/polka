@@ -185,8 +185,8 @@ is_specifier(char c)
 namespace kernel {
 
 int
-Console::printFormat(const char* fmt,
-                     ...)
+Console::printFormat(const char* format,
+                     va_list args)
 {
     enum {
         Default = 0,
@@ -195,13 +195,10 @@ Console::printFormat(const char* fmt,
         Size
     } state = Default;
 
-    va_list vl;
-    va_start(vl, fmt);
-
     int nchars = 0;
     Spec spec;
 
-    for (const char* p = fmt; *p != 0; p++) {
+    for (const char* p = format; *p != 0; p++) {
         switch (state) {
             case Default:
                 if (*p == '%') {
@@ -273,19 +270,19 @@ Console::printFormat(const char* fmt,
             case 'i':
                 switch (spec.size) {
                     case Spec::Size::Normal:
-                        spec.value.d = va_arg(vl, int);
+                        spec.value.d = va_arg(args, int);
                         break;
                     case Spec::Size::DoubleShort:
-                        spec.value.hhd = (signed char)va_arg(vl, int);
+                        spec.value.hhd = (signed char)va_arg(args, int);
                         break;
                     case Spec::Size::Short:
-                        spec.value.hd = (short int)va_arg(vl, int);
+                        spec.value.hd = (short int)va_arg(args, int);
                         break;
                     case Spec::Size::Long:
-                        spec.value.ld = va_arg(vl, long int);
+                        spec.value.ld = va_arg(args, long int);
                         break;
                     case Spec::Size::DoubleLong:
-                        spec.value.lld = va_arg(vl, long long int);
+                        spec.value.lld = va_arg(args, long long int);
                         break;
                 }
                 spec.type = Spec::Type::Int;
@@ -296,29 +293,29 @@ Console::printFormat(const char* fmt,
             case 'x':
                 switch (spec.size) {
                     case Spec::Size::Normal:
-                        spec.value.x = va_arg(vl, unsigned int);
+                        spec.value.x = va_arg(args, unsigned int);
                         break;
                     case Spec::Size::DoubleShort:
-                        spec.value.hhx = (unsigned char)va_arg(vl, unsigned int);
+                        spec.value.hhx = (unsigned char)va_arg(args, unsigned int);
                         break;
                     case Spec::Size::Short:
-                        spec.value.hx = (unsigned short int)va_arg(vl, unsigned int);
+                        spec.value.hx = (unsigned short int)va_arg(args, unsigned int);
                         break;
                     case Spec::Size::Long:
-                        spec.value.lx = va_arg(vl, unsigned long int);
+                        spec.value.lx = va_arg(args, unsigned long int);
                         break;
                     case Spec::Size::DoubleLong:
-                        spec.value.llx = va_arg(vl, unsigned long long int);
+                        spec.value.llx = va_arg(args, unsigned long long int);
                         break;
                 }
                 spec.type = Spec::Type::Hex;
                 break;
             case 'c':
-                spec.value.c = va_arg(vl, int);
+                spec.value.c = va_arg(args, int);
                 spec.type = Spec::Type::Char;
                 break;
             case 's':
-                spec.value.s = va_arg(vl, char*);
+                spec.value.s = va_arg(args, char*);
                 spec.type = Spec::Type::String;
                 break;
         }
@@ -326,8 +323,18 @@ Console::printFormat(const char* fmt,
         continue;
     }
 
-    va_end(vl);
+    return nchars;
+}
 
+
+int
+Console::printFormat(const char* format,
+                     ...)
+{
+    va_list args;
+    va_start(args, format);
+    int nchars = printFormat(format, args);
+    va_end(args);
     return nchars;
 }
 

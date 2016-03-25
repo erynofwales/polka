@@ -13,6 +13,7 @@
 #define __ATTRIBUTES_HH__
 
 #define PACKED __attribute__((packed))
-#define NORETURN __attribute((noreturn))
+#define NORETURN __attribute__((noreturn))
+#define PRINTF(formatArg, variableArgStart) __attribute__((format (printf, formatArg, variableArgStart)))
 
 #endif /* __ATTRIBUTES_HH__ */

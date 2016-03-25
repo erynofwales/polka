@@ -9,8 +9,11 @@
 #ifndef __CONSOLE_HH__
 #define __CONSOLE_HH__
 
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "Attributes.hh"
+
 
 namespace kernel {
 
@@ -62,8 +65,9 @@ struct Console
      * Write a format string to the current cursor position. Returns the number
      * of characters printed.
      */
-    int printFormat(const char *format, ...)
-        __attribute__((format (printf, 2, 3)));
+    int printFormat(const char *format, ...) PRINTF(2, 3);
+    int printFormat(const char *format, va_list args);
+
 
     void setColor(Color fg, Color bg);
 
