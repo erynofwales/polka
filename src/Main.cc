@@ -22,6 +22,9 @@
 #error "This file should be compiled with an ix86-elf compiler!"
 #endif
 
+extern u32 kernelStart;
+extern u32 kernelEnd;
+
 
 /** The beginning of the world... */
 extern "C"
@@ -36,6 +39,12 @@ kmain(multiboot::Information *information,
     kernel.initialize();
 
     auto& console = kernel.console();
+
+    auto start = u32(&kernelStart);
+    auto end = u32(&kernelEnd);
+    console.printFormat("Kernel start: 0x%08lX\n", start);
+    console.printFormat("Kernel end: 0x%08lX\n", end);
+    console.printFormat("Kernel size: %ld bytes\n", end - start);
 
     console.printFormat("Command line: \"%s\"\n", info->commandLine());
 
