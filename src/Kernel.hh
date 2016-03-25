@@ -18,13 +18,19 @@
 
 namespace kernel {
 
+/** Collection of useful tidbits for setting up the system. */
 struct StartupInformation
 {
+    /** Starting address of the kernel. */
     u32 kernelStart;
+    /** Ending address (the first address *after* the last) of the kernel. */
     u32 kernelEnd;
+    /** Pointer to the multiboot information struct. */
     multiboot::Information* multibootInformation;
 };
 
+
+/** The kernel itself. */
 struct Kernel
 {
     static Kernel& systemKernel();
