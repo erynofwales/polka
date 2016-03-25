@@ -48,9 +48,6 @@ struct PACKED Information
         uint32_t mLength;
     };
 
-    static const Information *information();
-    static void setInformation(Information* info);
-
     uint32_t lowerMemoryKB() const;
     uint32_t upperMemoryKB() const;
 

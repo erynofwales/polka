@@ -25,28 +25,9 @@ enum Present {
     VBE = 1 << 11,
 };
 
-multiboot::Information *sInformation = 0;
-
 }
 
 namespace multiboot {
-
-/*
- * Static
- */
-
-const Information *
-Information::information()
-{
-    return sInformation;
-}
-
-
-void
-Information::setInformation(Information *info)
-{
-    sInformation = info;
-}
 
 /*
  * Public
