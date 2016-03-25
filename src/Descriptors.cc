@@ -13,7 +13,7 @@ namespace {
 
 /**
  * Six byte field containing the length and a linear address where a descriptor
- * table livs.
+ * table lives. One of these is passed to the `lgdt` and `lidt` instructions.
  */
 struct PseudoDescriptor
 {
@@ -24,17 +24,6 @@ struct PseudoDescriptor
 }
 
 namespace x86 {
-
-/*
- * Static
- */
-
-GDT&
-GDT::systemGDT()
-{
-    static GDT sGDT;
-    return sGDT;
-}
 
 /*
  * Public

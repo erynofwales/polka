@@ -85,8 +85,6 @@ struct GDT
         Descriptor descriptor() const;
     };
 
-    static GDT& systemGDT();
-
     GDT();
 
     /** Set the descriptor at the given `index` to the value of `spec`. */
