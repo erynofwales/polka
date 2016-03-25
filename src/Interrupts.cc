@@ -76,8 +76,6 @@ InterruptHandler::InterruptHandler()
 void
 InterruptHandler::initialize()
 {
-    auto& console = kernel::Console::systemConsole();
-
     // All interrupts start out as "unhandled"
     for (size_t i = 0; i < IDT::Size; i++) {
         mIDT.setDescriptor(i, IDT::DescriptorSpec::exceptionHandler(0x8, &unhandledInterrupt));
@@ -97,11 +95,9 @@ InterruptHandler::initialize()
     mIDT.load();
 
     mPIC.initialize(0x20, 0x28);  // Map hardware IRQs to interrupt vectors 32 through 48.
-    console.printString("Hardware interrupts initialized\n");
 
     // Enable the keyboard interrupt.
     mPIC.enableInterrupt(1, true);
-    console.printString("Enabling keyboard interrupt\n");
 }
 
 
