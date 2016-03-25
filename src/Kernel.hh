@@ -25,6 +25,8 @@ struct StartupInformation
     u32 kernelStart;
     /** Ending address (the first address *after* the last) of the kernel. */
     u32 kernelEnd;
+    /** Multiboot's magic value. This should be verified. */
+    u32 multibootMagic;
     /** Pointer to the multiboot information struct. */
     multiboot::Information* multibootInformation;
 };

@@ -38,6 +38,7 @@ kmain(multiboot::Information *information,
     kernel::StartupInformation startupInformation;
     startupInformation.kernelStart = u32(&kernelStart);
     startupInformation.kernelEnd = u32(&kernelEnd);
+    startupInformation.multibootMagic = magic;
     startupInformation.multibootInformation = information;
 
     kernel.initialize(startupInformation);
