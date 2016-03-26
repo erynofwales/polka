@@ -11,9 +11,9 @@
 
 #include "Attributes.hh"
 #include "Console.hh"
-#include "Memory.hh"
 #include "Multiboot.hh"
 #include "kstd/Types.hh"
+#include "memory/Memory.hh"
 
 
 namespace kernel {

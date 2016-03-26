@@ -24,7 +24,7 @@ private:
 
     void initializeGDT();
 };
-    
+
 } /* namespace kernel */
 
 #endif /* __MEMORY_HH__ */

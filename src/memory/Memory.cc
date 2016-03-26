@@ -33,5 +33,5 @@ MemoryManager::initializeGDT()
     mGDT.setDescriptor(2, x86::GDT::DescriptorSpec::kernelSegment(0, 0xFFFFFFFF, x86::GDT::Type::DataRW));
     mGDT.load();
 }
-    
+
 } /* namespace kernel */

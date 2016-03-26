@@ -15,7 +15,6 @@ files = [
     'Descriptors.cc',
     'Interrupts.cc',
     'Kernel.cc',
-    'Memory.cc',
     'Multiboot.cc',
     'PIC.cc',
     'cxa.cc',
@@ -23,6 +22,8 @@ files = [
 
     'kstd/CString.cc',
     'kstd/Memory.cc',
+
+    'memory/Memory.cc',
 ]
 
 toolchain_bin = Dir(os.environ['POLKA_TOOLCHAIN']).Dir('bin')
