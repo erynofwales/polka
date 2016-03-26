@@ -44,9 +44,7 @@ Kernel::initialize(const StartupInformation& startupInformation)
     mConsole.clear(kernel::Console::Color::Blue);
     mConsole.printString("Loading Polka...\n");
 
-    mConsole.printFormat("Kernel start: 0x%08lX\n", startupInformation.kernelStart);
-    mConsole.printFormat("Kernel end: 0x%08lX\n", startupInformation.kernelEnd);
-    mConsole.printFormat("Kernel size: %ld bytes\n", startupInformation.kernelEnd - startupInformation.kernelStart);
+    mConsole.printFormat("Kernel image: start = 0x%08lX, end = 0x%08lX, size = %ld bytes\n", startupInformation.kernelStart, startupInformation.kernelEnd, startupInformation.kernelEnd - startupInformation.kernelStart);
 
     auto& multiboot = startupInformation.multibootInformation;
 
