@@ -8,6 +8,7 @@
 
 #include <stdarg.h>
 #include "Console.hh"
+#include "Kernel.hh"
 #include "kstd/ASCII.hh"
 #include "kstd/CString.hh"
 #include "kstd/Types.hh"
@@ -316,7 +317,7 @@ printFormat(const char* format,
                 spec.type = Spec::Type::String;
                 break;
         }
-        nchars += spec.print(*this);
+        nchars += spec.print(kernel::systemKernel().console());
         continue;
     }
 
