@@ -46,8 +46,8 @@ Kernel::initialize(const StartupInformation& startupInformation)
 
     mConsole.printFormat("Kernel image: start = 0x%08lX, end = 0x%08lX, size = %ld bytes\n", startupInformation.kernelStart, startupInformation.kernelEnd, startupInformation.kernelEnd - startupInformation.kernelStart);
 
-    auto& multiboot = startupInformation.multibootInformation;
-
+    auto multiboot = startupInformation.multibootInformation;
+    mConsole.printFormat("Multiboot: start = 0x%08lX\n", u32(multiboot));
     mConsole.printFormat("Command line: \"%s\"\n", multiboot->commandLine());
 
     mConsole.printFormat("Memory map:\n");
