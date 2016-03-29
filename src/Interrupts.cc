@@ -10,6 +10,7 @@
 #include "Console.hh"
 #include "IO.hh"
 #include "Kernel.hh"
+#include "kstd/PrintFormat.hh"
 
 
 extern "C" {
@@ -164,7 +165,7 @@ InterruptHandler::doKeyboardInterrupt()
     auto& console = kernel::Console::systemConsole();
     do {
         c = kernel::io::inw(0x60);
-        console.printFormat("Key! (scancode 0x%02X)\n", c);
+        kstd::printFormat("Key! (scancode 0x%02X)\n", c);
     } while (c == 0);
 }
 

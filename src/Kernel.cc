@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include "Kernel.hh"
 #include "Interrupts.hh"
+#include "kstd/PrintFormat.hh"
 
 namespace {
 
@@ -42,26 +43,30 @@ void
 Kernel::initialize(const StartupInformation& startupInformation)
 {
     mConsole.clear(kernel::Console::Color::Blue);
-    mConsole.printString("Loading Polka...\n");
 
-    mConsole.printFormat("Kernel image: start = 0x%08lX, end = 0x%08lX, size = %ld bytes\n", startupInformation.kernelStart, startupInformation.kernelEnd, startupInformation.kernelEnd - startupInformation.kernelStart);
+    kstd::printString("Loading Polka...\n");
+
+    kstd::printFormat("Kernel image: start = 0x%08lX, end = 0x%08lX, size = %ld bytes\n",
+                      startupInformation.kernelStart, startupInformation.kernelEnd,
+                      startupInformation.kernelEnd - startupInformation.kernelStart);
 
     auto multiboot = startupInformation.multibootInformation;
-    mConsole.printFormat("Multiboot: start = 0x%08lX\n", u32(multiboot));
-    mConsole.printFormat("Command line: \"%s\"\n", multiboot->commandLine());
+    kstd::printFormat("Multiboot: start = 0x%08lX\n", u32(multiboot));
+    kstd::printFormat("Command line: \"%s\"\n", multiboot->commandLine());
 
-    mConsole.printFormat("Memory map:\n");
-    mConsole.printFormat("  available: lower = %ld KB, upper = %ld KB\n", multiboot->lowerMemoryKB(), multiboot->upperMemoryKB());
+    kstd::printFormat("Memory map:\n");
+    kstd::printFormat("  available: lower = %ld KB, upper = %ld KB\n",
+                      multiboot->lowerMemoryKB(), multiboot->upperMemoryKB());
     for (auto it = multiboot->memoryMapBegin(); it != multiboot->memoryMapEnd(); ++it) {
         auto begin = (*it).base;
         auto end = begin + (*it).length - 1;
-        mConsole.printFormat("  begin = 0x%08lX %08lX, end = 0x%08lX %08lX (%s)\n",
-                             u32(begin >> 32), u32(begin & 0xFFFFFFFF),
-                             u32(end >> 32), u32(end & 0xFFFFFFFF),
-                             (*it).type == 1 ? "available" : "reserved");
+        kstd::printFormat("  begin = 0x%08lX %08lX, end = 0x%08lX %08lX (%s)\n",
+                          u32(begin >> 32), u32(begin & 0xFFFFFFFF),
+                          u32(end >> 32), u32(end & 0xFFFFFFFF),
+                          (*it).type == 1 ? "available" : "reserved");
     }
 
-    mMemoryManager.initialize(mConsole);
+    mMemoryManager.initialize();
 }
 
 
@@ -70,11 +75,12 @@ Kernel::panic(const char* msg,
               ...)
 {
     mConsole.clear(Console::Color::Magenta);
-    mConsole.printString("PANIC! PANIC! PANIC! :-(\n");
+
+    kstd::printString("PANIC! PANIC! PANIC! :-(\n");
 
     va_list args;
     va_start(args, msg);
-    mConsole.printFormat(msg, args);
+    kstd::printFormat(msg, args);
     va_end(args);
 
     // TODO: Dump registers.
