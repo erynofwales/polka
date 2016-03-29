@@ -11,7 +11,6 @@ files = [
     'boot.s',
     'Main.cc',
     'Console.cc',
-    'ConsolePrintFormat.cc',
     'Descriptors.cc',
     'Interrupts.cc',
     'Kernel.cc',
@@ -22,6 +21,7 @@ files = [
 
     'kstd/CString.cc',
     'kstd/Memory.cc',
+    'kstd/PrintFormat.cc',
 
     'memory/Memory.cc',
 ]
