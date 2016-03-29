@@ -162,7 +162,6 @@ InterruptHandler::doKeyboardInterrupt()
 {
     // Quick 'n dirty read the scancode.
     unsigned int c = 0;
-    auto& console = kernel::Console::systemConsole();
     do {
         c = kernel::io::inw(0x60);
         kstd::printFormat("Key! (scancode 0x%02X)\n", c);

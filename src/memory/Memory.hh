@@ -17,7 +17,7 @@ namespace kernel {
 
 struct MemoryManager
 {
-    void initialize(Console& console);
+    void initialize();
 
 private:
     x86::GDT mGDT;

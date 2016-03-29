@@ -44,7 +44,7 @@ Kernel::initialize(const StartupInformation& startupInformation)
 {
     mConsole.clear(kernel::Console::Color::Blue);
 
-    kstd::printString("Loading Polka...\n");
+    kstd::printFormat("Loading Polka...\n");
 
     kstd::printFormat("Kernel image: start = 0x%08lX, end = 0x%08lX, size = %ld bytes\n",
                       startupInformation.kernelStart, startupInformation.kernelEnd,
@@ -76,7 +76,7 @@ Kernel::panic(const char* msg,
 {
     mConsole.clear(Console::Color::Magenta);
 
-    kstd::printString("PANIC! PANIC! PANIC! :-(\n");
+    kstd::printFormat("PANIC! PANIC! PANIC! :-(\n");
 
     va_list args;
     va_start(args, msg);

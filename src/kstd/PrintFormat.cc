@@ -197,6 +197,8 @@ printFormat(const char* format,
         Size
     } state = Default;
 
+    auto& cons = kernel::Kernel::systemKernel().console();
+
     int nchars = 0;
     Spec spec;
 
@@ -207,14 +209,14 @@ printFormat(const char* format,
                     state = Percent;
                     spec.clear();
                 } else {
-                    printChar(*p);
+                    cons.printChar(*p);
                     nchars++;
                 }
                 break;
             case Percent:
                 if (*p == '%') {
                     state = Default;
-                    printChar(*p);
+                    cons.printChar(*p);
                     nchars++;
                 } else if (Char::isDigit(*p)) {
                     if (*p == '0' && !spec.zeroPadded) {
@@ -247,7 +249,7 @@ printFormat(const char* format,
                 }
                 break;
             default:
-                printChar(*p);
+                cons.printChar(*p);
                 nchars++;
                 break;
         }
@@ -317,7 +319,7 @@ printFormat(const char* format,
                 spec.type = Spec::Type::String;
                 break;
         }
-        nchars += spec.print(kernel::systemKernel().console());
+        nchars += spec.print(cons);
         continue;
     }
 

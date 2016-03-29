@@ -7,6 +7,7 @@
  */
 
 #include "Memory.hh"
+#include "kstd/PrintFormat.hh"
 
 namespace kernel {
 
@@ -15,10 +16,10 @@ namespace kernel {
  */
 
 void
-MemoryManager::initialize(Console& console)
+MemoryManager::initialize()
 {
     initializeGDT();
-    console.printString("GDT loaded\n");
+    kstd::printFormat("GDT loaded\n");
 }
 
 /*
