@@ -62,13 +62,9 @@ struct Console
     void printString(const char *str);
 
     /**
-     * Write a format string to the current cursor position. Returns the number
-     * of characters printed.
+     * Set the current cursor color. Subsequent characters will be written in
+     * this color.
      */
-    int printFormat(const char *format, ...) PRINTF(2, 3);
-    int printFormat(const char *format, va_list args);
-
-
     void setColor(Color fg, Color bg);
 
 private:

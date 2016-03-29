@@ -1,9 +1,9 @@
-/* ConsolePrintFormat.cc
+/* PrintFormat.cc
  * vim: set tw=80:
  * Eryn Wells <eryn@erynwells.me>
  */
 /**
- * Implementation of Console::printFormat, a printf style method.
+ * Declares printFormat(), for writing formatted strings to the appropriate channel.
  */
 
 #include <stdarg.h>
@@ -168,25 +168,26 @@ Spec::print(kernel::Console& console)
 
 
 inline bool
-is_size(char c)
+isSize(char c)
 {
     return c == 'h' || c == 'l';
 }
 
 
 inline bool
-is_specifier(char c)
+isSpecifier(char c)
 {
     return c == 'd' || c == 'x' || c == 'X' || c == 'c' || c == 's';
 }
 
 } /* anonymous namespace */
 
-namespace kernel {
+
+namespace kstd {
 
 int
-Console::printFormat(const char* format,
-                     va_list args)
+printFormat(const char* format,
+            va_list args)
 {
     enum {
         Default = 0,
@@ -214,33 +215,33 @@ Console::printFormat(const char* format,
                     state = Default;
                     printChar(*p);
                     nchars++;
-                } else if (kstd::Char::isDigit(*p)) {
+                } else if (Char::isDigit(*p)) {
                     if (*p == '0' && !spec.zeroPadded) {
                         spec.zeroPadded = true;
                     } else {
                         state = Width;
                         spec.width = *p - '0';
                     }
-                } else if (is_size(*p)) {
+                } else if (isSize(*p)) {
                     goto state_size;
-                } else if (is_specifier(*p)) {
+                } else if (isSpecifier(*p)) {
                     goto state_specifier;
                 }
                 break;
             case Width:
-                if (kstd::Char::isDigit(*p)) {
+                if (Char::isDigit(*p)) {
                     spec.width = 10 * spec.width + (*p - '0');
-                } else if (is_size(*p)) {
+                } else if (isSize(*p)) {
                     state = Size;
                     goto state_size;
-                } else if (is_specifier(*p)) {
+                } else if (isSpecifier(*p)) {
                     goto state_specifier;
                 }
                 break;
             case Size:
-                if (is_size(*p)) {
+                if (isSize(*p)) {
                     goto state_size;
-                } else if (is_specifier(*p)) {
+                } else if (isSpecifier(*p)) {
                     goto state_specifier;
                 }
                 break;
@@ -253,13 +254,9 @@ Console::printFormat(const char* format,
 
     state_size:
         if (*p == 'h') {
-            spec.size =   (spec.size == Spec::Size::Short)
-                        ? Spec::Size::DoubleShort
-                        : Spec::Size::Short;
+            spec.size = (spec.size == Spec::Size::Short) ? Spec::Size::DoubleShort : Spec::Size::Short;
         } else if (*p == 'l') {
-            spec.size =   (spec.size == Spec::Size::Long)
-                        ? Spec::Size::DoubleLong
-                        : Spec::Size::Long;
+            spec.size = (spec.size == Spec::Size::Long) ? Spec::Size::DoubleLong : Spec::Size::Long;
         }
         continue;
 
@@ -328,8 +325,8 @@ Console::printFormat(const char* format,
 
 
 int
-Console::printFormat(const char* format,
-                     ...)
+printFormat(const char* format,
+            ...)
 {
     va_list args;
     va_start(args, format);
@@ -338,4 +335,4 @@ Console::printFormat(const char* format,
     return nchars;
 }
 
-} /* namespace kernel */
+} /* namespace kstd */
