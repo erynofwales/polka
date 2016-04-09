@@ -48,7 +48,7 @@ Kernel::initialize(const StartupInformation& startupInformation)
 
     kstd::printFormat("Kernel image: start = 0x%08lX, end = 0x%08lX, size = %ld bytes\n",
                       startupInformation.kernelStart, startupInformation.kernelEnd,
-                      startupInformation.kernelEnd - startupInformation.kernelStart);
+                      startupInformation.kernelSize());
 
     auto multiboot = startupInformation.multibootInformation;
     kstd::printFormat("Multiboot: start = 0x%08lX\n", u32(multiboot));
