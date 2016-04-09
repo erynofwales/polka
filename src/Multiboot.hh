@@ -12,17 +12,19 @@
 
 #include "stdint.h"
 #include "Attributes.hh"
+#include "kstd/Types.hh"
+
 
 namespace multiboot {
 
 struct PACKED MemoryChunk
 {
     /** Base address of the chunk of memory. */
-    uint64_t base;
+    u64 base;
     /** Length of the chunk of memory, in bytes. */
-    uint64_t length;
+    u64 length;
     /** Type of address range. 1 indicates available; all other values indicate reserved memory. */
-    uint32_t type;
+    u32 type;
 };
 
 /**
@@ -33,7 +35,7 @@ struct PACKED Information
 {
     struct MemoryMapIterator
     {
-        MemoryMapIterator(uint32_t address, uint32_t count);
+        MemoryMapIterator(u32 address, u32 count);
         MemoryMapIterator(const MemoryMapIterator& other);
 
         MemoryMapIterator& operator++();
@@ -44,12 +46,16 @@ struct PACKED Information
         bool operator!=(const MemoryMapIterator& other) const;
 
     private:
-        uint32_t mCurrent;
-        uint32_t mLength;
+        u32 mCurrent;
+        u32 mLength;
     };
 
-    uint32_t lowerMemoryKB() const;
-    uint32_t upperMemoryKB() const;
+    /** Size of lower memory in KB. */
+    u32 lowerMemoryKB() const;
+    /** Size of upper memory in KB. */
+    u32 upperMemoryKB() const;
+    /** Total size of memory in KB. */
+    u32 memoryKB() const;
 
     const char* commandLine() const;
 
@@ -58,27 +64,27 @@ struct PACKED Information
 
 private:
     /** Bit field of flags. Fields below are only defined if the appropriate flag is set. */
-    uint32_t mFlags;
+    u32 mFlags;
 
     /** Amount of lower (0 to 1 MB) memory, in KB. */
-    uint32_t mMemLower;
+    u32 mMemLower;
     /** Amount of upper (1 MB to ...) memory, in KB. Maximally, this value is the address of the first upper memory hole, minus 1 MB. */
-    uint32_t mMemUpper;
+    u32 mMemUpper;
 
     /** Indicates which BIOS disk the boot loader loaded the OS image from. */
     struct PACKED {
         /** Third level partition number. If unused this is set to 0xFF. */
-        uint8_t partitionLevel3;
+        u8 partitionLevel3;
         /** Sub-partition number. If unused this is set to 0xFF. */
-        uint8_t partitionLevel2;
+        u8 partitionLevel2;
         /** Top-level partition number. */
-        uint8_t partitionLevel1;
+        u8 partitionLevel1;
         /** BIOS drive number, as returned by the `INT 0x13` low-level disk interface. */
-        uint8_t driveNumber;
+        u8 driveNumber;
     } mBootDevice;
 
     /** Pointer to a C-style string containing the command line arguments. */
-    uint32_t mCommandLine;
+    u32 mCommandLine;
 
     /**
      * Multiboot Modules
@@ -87,24 +93,24 @@ private:
      * @{
      */
     /** Number of boot modules present. */
-    uint32_t mModulesCount;
+    u32 mModulesCount;
     /** Pointer to start of boot modules array. */
-    uint32_t mModulesAddress;
+    u32 mModulesAddress;
     /** @} */
 
     // TODO: Document these.
     union PACKED {
         struct PACKED {
-            uint32_t tableSize;
-            uint32_t stringSize;
-            uint32_t address;
-            uint32_t reserved;
+            u32 tableSize;
+            u32 stringSize;
+            u32 address;
+            u32 reserved;
         } aout;
         struct PACKED {
-            uint32_t number;
-            uint32_t size;
-            uint32_t address;
-            uint32_t shndx; // TODO: Bad name. What is this?
+            u32 number;
+            u32 size;
+            u32 address;
+            u32 shndx; // TODO: Bad name. What is this?
         } elf;
     } symbols;
 
@@ -114,9 +120,9 @@ private:
      * @{
      */
     /** Length of the buffer, in bytes. The spec is somewhat unclear on this field. */
-    uint32_t mMemoryMapLength;
+    u32 mMemoryMapLength;
     /** Pointer to start of memory map entry array. */
-    uint32_t mMemoryMapAddress;
+    u32 mMemoryMapAddress;
     /** @} */
 
     /**
@@ -125,35 +131,35 @@ private:
      * @{
      */
     /** Number of memory map entries present. */
-    uint32_t mDrivesLength;
+    u32 mDrivesLength;
     /** Pointer to start of memory map entry array. */
-    uint32_t mDrivesAddress;
+    u32 mDrivesAddress;
     /** @} */
 
     /** Pointer to a table containing APM information. */
-    uint32_t mAPMTable;
+    u32 mAPMTable;
 
     /** I dunno some VBE stuff. TODO. */
     struct PACKED {
-        uint32_t controlInformation;
-        uint32_t modeInformation;
-        uint32_t mode;
-        uint32_t interfaceSegment;
-        uint32_t interfaceOff;
-        uint32_t interfaceLength;
+        u32 controlInformation;
+        u32 modeInformation;
+        u32 mode;
+        u32 interfaceSegment;
+        u32 interfaceOff;
+        u32 interfaceLength;
     } vbe;
 };
 
 struct PACKED Module
 {
     /** Start address of boot module. */
-    uint32_t start;
+    u32 start;
     /** End address of boot module. */
-    uint32_t end;
+    u32 end;
     /** Pointer to a C-style boot module string. */
-    uint32_t string;
+    u32 string;
     /** Reserved and ignored. */
-    uint32_t reserved;
+    u32 reserved;
 };
 
 // TODO: Define the Drive struct

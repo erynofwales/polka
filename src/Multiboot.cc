@@ -33,8 +33,8 @@ namespace multiboot {
  * Public
  */
 
-Information::MemoryMapIterator::MemoryMapIterator(uint32_t address,
-                                                  uint32_t length)
+Information::MemoryMapIterator::MemoryMapIterator(u32 address,
+                                                  u32 length)
     : mCurrent(address),
       mLength(length)
 { }
@@ -51,7 +51,7 @@ Information::MemoryMapIterator::operator++()
 {
     if (mLength > 0) {
         // The size of the current struct is stored at (mCurrent - 4) bytes.
-        auto size = *reinterpret_cast<uint32_t*>(mCurrent) + 4;
+        auto size = *reinterpret_cast<u32*>(mCurrent) + 4;
         mCurrent = mCurrent + size;
         mLength = (size > mLength) ? 0 : mLength - size;
     }
@@ -95,7 +95,7 @@ Information::MemoryMapIterator::operator!=(const MemoryMapIterator& other)
 }
 
 
-uint32_t
+u32
 Information::lowerMemoryKB()
     const
 {
@@ -106,7 +106,7 @@ Information::lowerMemoryKB()
 }
 
 
-uint32_t
+u32
 Information::upperMemoryKB()
     const
 {
@@ -114,6 +114,14 @@ Information::upperMemoryKB()
         return 0;
     }
     return mMemUpper;
+}
+
+
+u32
+Information::memoryKB()
+    const
+{
+    return lowerMemoryKB() + upperMemoryKB();
 }
 
 
