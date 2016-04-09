@@ -38,6 +38,9 @@ struct StartupInformation
 
     /** Size of the kernel image in bytes. */
     u32 kernelSize() const;
+
+    /** Size of memory in bytes. */
+    u32 memorySize() const;
 };
 
 } /* namespace kernel */
