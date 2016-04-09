@@ -66,7 +66,7 @@ Kernel::initialize(const StartupInformation& startupInformation)
                           (*it).type == 1 ? "available" : "reserved");
     }
 
-    mMemoryManager.initialize();
+    mMemoryManager.initialize(startupInformation);
 }
 
 

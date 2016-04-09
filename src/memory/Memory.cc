@@ -6,8 +6,8 @@
  * Top-level classes for managing system memory.
  */
 
-#include "Memory.hh"
 #include "kstd/PrintFormat.hh"
+#include "memory/Memory.hh"
 
 namespace kernel {
 
@@ -15,11 +15,16 @@ namespace kernel {
  * Public
  */
 
+MemoryManager::MemoryManager()
+    : mGDT(),
+      mFrameAllocator()
+{ }
+
 void
-MemoryManager::initialize()
+MemoryManager::initialize(const StartupInformation& startupInformation)
 {
     initializeGDT();
-    kstd::printFormat("GDT loaded\n");
+    mFrameAllocator.initialize(startupInformation);
 }
 
 /*
@@ -33,6 +38,7 @@ MemoryManager::initializeGDT()
     mGDT.setDescriptor(1, x86::GDT::DescriptorSpec::kernelSegment(0, 0xFFFFFFFF, x86::GDT::Type::CodeEXR));
     mGDT.setDescriptor(2, x86::GDT::DescriptorSpec::kernelSegment(0, 0xFFFFFFFF, x86::GDT::Type::DataRW));
     mGDT.load();
+    kstd::printFormat("GDT loaded\n");
 }
 
 } /* namespace kernel */
