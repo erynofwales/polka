@@ -15,6 +15,7 @@ files = [
     'Interrupts.cc',
     'Kernel.cc',
     'Multiboot.cc',
+    'StartupInformation.cc',
     'PIC.cc',
     'cxa.cc',
     'isr.S',
