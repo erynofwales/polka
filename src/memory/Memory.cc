@@ -41,4 +41,11 @@ MemoryManager::initializeGDT()
     kstd::printFormat("GDT loaded\n");
 }
 
+namespace memory {
+
+const u32 pageSize = 4096;
+const u32 pageMask = pageSize - 1;
+
+} /* namespace memory */
+
 } /* namespace kernel */
