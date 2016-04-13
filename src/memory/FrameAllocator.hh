@@ -10,8 +10,8 @@
 #define __MEMORY_FRAMEALLOCATOR_HH__
 
 #include "StartupInformation.hh"
+#include "kstd/Bitmap.hh"
 #include "kstd/Types.hh"
-
 
 namespace kernel {
 
@@ -22,12 +22,15 @@ struct FrameAllocator
     void initialize(const StartupInformation& startupInformation);
 
 private:
-    typedef u8 FrameBitmap;
+    typedef kstd::Bitmap<u8> Bitmap;
 
     /** Starting address of the frame allocation bitmap. */
-    FrameBitmap* mBitmap;
-    /** Size of the bitmap in bytes. */
+    Bitmap* mBitmap;
+    /** Size of the bitmap in `sizeof(Bitmap)` units. */
     u32 mBitmapSize;
+
+    /** Reserve a range of memory. */
+    void reserveRange(u32 start, u32 length);
 };
 
 } /* namespace  */
