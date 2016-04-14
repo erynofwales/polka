@@ -46,7 +46,7 @@ private:
     void* addressOfPage(usize page) const;
 };
 
-} /* namespace  */
+} /* namespace kernel */
 
 #endif /* __MEMORY_FRAMEALLOCATOR_HH__ */
 
