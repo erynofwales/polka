@@ -23,14 +23,6 @@ struct StartupInformation
     /** Ending address (the first valid address *after* the last) of the kernel. 4K aligned. */
     u32 kernelEnd;
 
-    /**
-     * @defgroup Memory
-     * @{
-     */
-    /** System page size in bytes. */
-    u32 pageSize;
-    /** @} */
-
     /** Multiboot's magic value. This should be verified. */
     u32 multibootMagic;
     /** Pointer to the multiboot information struct. */

@@ -39,7 +39,6 @@ kmain(multiboot::Information *information,
     startupInformation.kernelStart = u32(&kernelStart);
     startupInformation.kernelEnd = u32(&kernelEnd);
     // TODO: Define this somewhere else.
-    startupInformation.pageSize = 4096;
     startupInformation.multibootMagic = magic;
     startupInformation.multibootInformation = information;
 
