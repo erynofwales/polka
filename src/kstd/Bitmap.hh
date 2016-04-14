@@ -31,6 +31,13 @@ struct Bitmap
         : mBitmap(value)
     { }
 
+    /** Get this bit field's primitive representation. */
+    operator FieldType()
+        const
+    {
+        return mBitmap;
+    }
+
     /** Get the status of a single bit. Returns `true` if the bit is 1. */
     bool
     isSet(usize bit)
@@ -82,14 +89,14 @@ struct Bitmap
     void
     fill()
     {
-        mBitmap = ~(0);
+        mBitmap = FieldType(-1);
     }
 
     bool
     isFull()
         const
     {
-        return mBitmap != ~(0);
+        return mBitmap == FieldType(-1);
     }
 
 private:
