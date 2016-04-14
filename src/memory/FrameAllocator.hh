@@ -21,6 +21,14 @@ struct FrameAllocator
 
     void initialize(const StartupInformation& startupInformation);
 
+    /**
+     * Allocate a page. Find a free page, mark it in use, and return its
+     * address.
+     *
+     * @return The base address of a free page, or 0 if no page could be allocated.
+     */
+    void* allocate();
+
 private:
     typedef kstd::Bitmap<u8> Bitmap;
 
@@ -33,6 +41,9 @@ private:
 
     /** Reserve a range of memory. */
     void reserveRange(u32 start, u32 length);
+
+    /** Return the physical memory address of `page`. */
+    void* addressOfPage(usize page) const;
 };
 
 } /* namespace  */

@@ -47,6 +47,25 @@ FrameAllocator::initialize(const StartupInformation& startupInformation)
     reserveRange(startupInformation.kernelStart, startupInformation.kernelSize() + mBitmapSize);
 }
 
+void*
+FrameAllocator::allocate()
+{
+    // Find the first bitmap with a free slot, and the first free slot, and return it.
+    const u32 pagesPerBitmap = Bitmap::length;
+    for (usize i = 0; i < mNumberOfPages; i += pagesPerBitmap) {
+        auto bitmap = mBitmap[i];
+        if (!bitmap.isFull()) {
+            for (usize j = 0; j < pagesPerBitmap; j++) {
+                if (!bitmap.isSet(j)) {
+                    bitmap.set(j);
+                    return addressOfPage(i * pagesPerBitmap + j);
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
 void
 FrameAllocator::reserveRange(u32 start,
                              u32 length)
@@ -86,6 +105,13 @@ FrameAllocator::reserveRange(u32 start,
         bitmapOffset = (bitmapOffset + 1) % 8;
         page++;
     }
+}
+
+inline void*
+FrameAllocator::addressOfPage(usize page)
+    const
+{
+    return reinterpret_cast<void*>(page * memory::pageSize);
 }
 
 } /* namespace kernel */
