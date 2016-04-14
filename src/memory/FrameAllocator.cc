@@ -52,17 +52,22 @@ FrameAllocator::allocate()
 {
     // Find the first bitmap with a free slot, and the first free slot, and return it.
     const u32 pagesPerBitmap = Bitmap::length;
-    for (usize i = 0; i < mNumberOfPages; i += pagesPerBitmap) {
+    for (usize i = 0; i < mNumberOfPages; i++) {
         auto bitmap = mBitmap[i];
         if (!bitmap.isFull()) {
+            kstd::printFormat("Found partially full bitmap %ld -> %02X\n", i, u8(bitmap));
             for (usize j = 0; j < pagesPerBitmap; j++) {
                 if (!bitmap.isSet(j)) {
                     bitmap.set(j);
-                    return addressOfPage(i * pagesPerBitmap + j);
+                    usize page = i * pagesPerBitmap + j;
+                    void* pageAddress = addressOfPage(page);
+                    kstd::printFormat("Allocating frame for page %ld at address 0x%08lX\n", page, u32(pageAddress));
+                    return pageAddress;
                 }
             }
         }
     }
+    kstd::printFormat("Couldn't allocate frame\n");
     return nullptr;
 }
 
