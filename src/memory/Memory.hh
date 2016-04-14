@@ -32,8 +32,8 @@ private:
 
 namespace memory {
 
-extern const u32 pageSize;
-extern const u32 pageMask;
+extern const usize pageSize;
+extern const usize pageMask;
 
 /** Align to the nearest page boundary below `addr`. */
 inline u32
