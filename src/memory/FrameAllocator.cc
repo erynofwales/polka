@@ -59,8 +59,8 @@ FrameAllocator::reserveRange(u32 start,
 
     // Iterators
     u32 page = startPage;
-    u32 bitmapIndex = start / pagesPerBitmap;
-    u8 bitmapOffset = start % pagesPerBitmap;
+    u32 bitmapIndex = startPage / pagesPerBitmap;
+    u8 bitmapOffset = startPage % pagesPerBitmap;
 
     kstd::printFormat("Reserving %ld pages for memory addresses between 0x%08lX and 0x%08lX\n", endPage - startPage, start, start + length);
 
