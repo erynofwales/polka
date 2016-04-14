@@ -28,6 +28,8 @@ private:
     Bitmap* mBitmap;
     /** Size of the bitmap in `sizeof(Bitmap)` units. */
     u32 mBitmapSize;
+    /** Total number of pages. */
+    u32 mNumberOfPages;
 
     /** Reserve a range of memory. */
     void reserveRange(u32 start, u32 length);

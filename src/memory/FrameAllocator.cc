@@ -26,16 +26,16 @@ FrameAllocator::initialize(const StartupInformation& startupInformation)
     // Page frame bitmap starts immediately after the kernel.
     mBitmap = reinterpret_cast<Bitmap*>(startupInformation.kernelEnd);
 
-    const u32 numberOfPages = startupInformation.memorySize() / memory::pageSize;
+    mNumberOfPages = startupInformation.memorySize() / memory::pageSize;
     const u32 pagesPerBitmap = Bitmap::length;
 
-    mBitmapSize = numberOfPages / pagesPerBitmap;
-    if ((numberOfPages % pagesPerBitmap) != 0) {
+    mBitmapSize = mNumberOfPages / pagesPerBitmap;
+    if ((mNumberOfPages % pagesPerBitmap) != 0) {
         // Add an extra bitmap for the last few pages.
         mBitmapSize++;
     }
 
-    kstd::printFormat("Allocated bitmap of %ld bytes for %ld pages at 0x%08lX\n", mBitmapSize, numberOfPages, u32(mBitmap));
+    kstd::printFormat("Allocated bitmap of %ld bytes for %ld pages at 0x%08lX\n", mBitmapSize * sizeof(Bitmap), mNumberOfPages, u32(mBitmap));
 
     // TODO: Before modifying this memory, maybe make sure none of the multiboot information is hanging out there?
 
