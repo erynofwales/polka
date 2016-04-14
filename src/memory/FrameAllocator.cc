@@ -102,7 +102,7 @@ FrameAllocator::reserveRange(u32 start,
     }
 
     // Fill in entries in `pagesPerBitmap` sized chunks.
-    while ((endPage - page) > pagesPerBitmap) {
+    while ((endPage - page) >= pagesPerBitmap) {
         mBitmap[bitmapIndex++].fill();
         page += pagesPerBitmap;
     }
