@@ -85,11 +85,19 @@ struct Bitmap
         mBitmap = ~(0);
     }
 
+    bool
+    isFull()
+        const
+    {
+        return mBitmap != ~(0);
+    }
+
 private:
     FieldType mBitmap;
 
     inline bool
     isValid(usize bit)
+        const
     {
         return bit >= 0 && bit < Bitmap::length;
     }
