@@ -3,7 +3,8 @@
  * Eryn Wells <eryn@erynwells.me>
  */
 /**
- * An object to tracks and allocate physical page frames.
+ * This file deals with page frames, chunks of physical memory of `pageSize`
+ * length that can be filled with pages.
  */
 
 #ifndef __MEMORY_FRAMEALLOCATOR_HH__
@@ -22,10 +23,8 @@ struct FrameAllocator
     void initialize(const StartupInformation& startupInformation);
 
     /**
-     * Allocate a page. Find a free page, mark it in use, and return its
-     * address.
-     *
-     * @return The base address of a free page, or 0 if no page could be allocated.
+     * Allocate a page frame. Find a free page frame, mark it in use, and return
+     * its address.
      */
     void* allocate();
 

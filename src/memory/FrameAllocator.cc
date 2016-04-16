@@ -3,7 +3,8 @@
  * Eryn Wells <eryn@erynwells.me>
  */
 /**
- * An object to tracks and allocate physical page frames.
+ * This file deals with page frames, chunks of physical memory of `pageSize`
+ * length that can be filled with pages.
  */
 
 #include "Kernel.hh"
@@ -53,16 +54,14 @@ FrameAllocator::allocate()
     // Find the first bitmap with a free slot, and the first free slot, and return it.
     const u32 pagesPerBitmap = Bitmap::length;
     for (usize i = 0; i < mNumberOfPages; i++) {
-        auto bitmap = mBitmap[i];
+        auto& bitmap = mBitmap[i];
         if (bitmap.isFull()) {
             continue;
         }
-        kstd::printFormat("Found partially full bitmap %ld -> %02X\n", i, u8(bitmap));
         for (usize j = 0; j < pagesPerBitmap; j++) {
             if (bitmap.isSet(j)) {
                 continue;
             }
-            kstd::printFormat("Found unset bit %ld\n", j);
             bitmap.set(j);
             usize page = i * pagesPerBitmap + j;
             void* pageAddress = addressOfPage(page);
