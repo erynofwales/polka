@@ -43,39 +43,29 @@ struct Bitmap
     isSet(usize bit)
         const
     {
-        if (isValid(bit)) {
-            return (mBitmap & (1 << bit)) > 0;
-        }
-        return false;
+        return (mBitmap & FieldType(1 << bit)) > 0;
     }
 
     /** Set a single bit to 1. */
     void
     set(usize bit)
     {
-        if (isValid(bit)) {
-            mBitmap |= 1 << bit;
-        }
+        mBitmap |= FieldType(1 << bit);
     }
 
     /** Set a single bit to zero. */
     void
     clear(usize bit)
     {
-        if (isValid(bit)) {
-            mBitmap &= ~(1 << bit);
-        }
+        mBitmap &= ~FieldType(1 << bit);
     }
 
     /** Toggle the state of a single bit. Returns `true` if the bit was set to 1. */
     bool
     toggle(usize bit)
     {
-        if (isValid(bit)) {
-            mBitmap ^= 1 << bit;
-            return isSet(bit);
-        }
-        return false;
+        mBitmap ^= FieldType(1 << bit);
+        return isSet(bit);
     }
 
     /** Clear the entire bit field. */
@@ -101,13 +91,6 @@ struct Bitmap
 
 private:
     FieldType mBitmap;
-
-    inline bool
-    isValid(usize bit)
-        const
-    {
-        return bit >= 0 && bit < Bitmap::length;
-    }
 };
 
 } /* namespace kstd */
