@@ -139,7 +139,7 @@ Spec::print(kernel::Console& console)
                     break;
             }
         } else if (type == Type::Pointer) {
-            length = kstd::CString::fromUnsignedInteger(value.p, buf, 32, 16, true);
+            length = kstd::CString::fromPointer(value.p, buf, 32, 16, true);
         }
         if (width < length) {
             width = length;
