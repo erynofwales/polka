@@ -6,6 +6,9 @@
  * Utilities for dealing with C strings.
  */
 
+#ifndef __KSTD_CSTRING_HH__
+#define __KSTD_CSTRING_HH__
+
 #include "Types.hh"
 
 namespace kstd {
@@ -46,6 +49,7 @@ void uppercase(char *str);
  */
 usize fromInteger(i64 value, char* buffer, usize length, u8 base = 10, bool capitalized = false);
 usize fromUnsignedInteger(u64 value, char* buffer, usize length, u8 base = 10, bool capitalized = false);
+usize fromPointer(void* value, char* buffer, usize length, u8 base = 10, bool capitalized = false);
 /** @} */
 
 /** Convert a bool to a string. */
@@ -55,3 +59,5 @@ char* fromBool(bool value, char* str, usize length);
 
 } /* namespace CString */
 } /* namespace kstd */
+
+#endif /* __KSTD_CSTRING_HH__ */

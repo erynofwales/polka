@@ -159,6 +159,17 @@ fromUnsignedInteger(u64 value,
 }
 
 
+usize
+fromPointer(void* value,
+            char* buffer,
+            usize length,
+            u8 base,
+            bool capitalized)
+{
+    return fromUnsignedInteger(uptr(value), buffer, length, base, capitalized);
+}
+
+
 char*
 fromBool(bool value,
          char* str,
