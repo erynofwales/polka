@@ -25,11 +25,12 @@ struct Spec {
     };
 
     enum class Type {
-        Int,
-        Unsigned,
-        Hex,
         Char,
-        String
+        Hex,
+        Int,
+        Pointer,
+        String,
+        Unsigned,
     };
 
     bool zeroPadded;
@@ -56,6 +57,7 @@ struct Spec {
         u64 llx;
         char c;
         char* s;
+        void* p;
     } value;
 
     void clear();
@@ -82,12 +84,9 @@ Spec::print(kernel::Console& console)
     int length = 0;
     char buf[32];
     char pad = ' ';
-    char *str;
+    char *str = nullptr;
 
-    /*
-     * TypeChar is a special case because it will always be a single character
-     * in length and there is no \0 to terminate it.
-     */
+    // Type::Char is a special case because it will always be a single character in length and there is no \0 to terminate it.
     if (type == Type::Char) {
         if (width == 0) {
             width = 1;
@@ -99,8 +98,8 @@ Spec::print(kernel::Console& console)
         return width;
     }
 
-    if (type == Type::Int || type == Type::Hex) {
-        if (zeroPadded) {
+    if (type == Type::Int || type == Type::Hex || type == Type::Pointer || type == Type::Unsigned) {
+        if (zeroPadded || type == Type::Pointer) {
             pad = '0';
         }
         if (type == Type::Int) {
@@ -121,7 +120,7 @@ Spec::print(kernel::Console& console)
                     length = kstd::CString::fromInteger(value.lld, buf, 32);
                     break;
             }
-        } else {
+        } else if (type == Type::Hex || type == Type::Unsigned) {
             switch (size) {
                 case Size::Normal:
                     length = kstd::CString::fromUnsignedInteger(value.x, buf, 32, 16, capitalized);
@@ -139,6 +138,8 @@ Spec::print(kernel::Console& console)
                     length = kstd::CString::fromUnsignedInteger(value.llx, buf, 32, 16, capitalized);
                     break;
             }
+        } else if (type == Type::Pointer) {
+            length = kstd::CString::fromUnsignedInteger(value.p, buf, 32, 16, true);
         }
         if (width < length) {
             width = length;
@@ -178,7 +179,7 @@ isSize(char c)
 inline bool
 isSpecifier(char c)
 {
-    return c == 'd' || c == 'x' || c == 'X' || c == 'c' || c == 's';
+    return c == 'c' || c == 'd' || c == 'i' || c == 'p' || c == 's' || c == 'x' || c == 'X';
 }
 
 } /* anonymous namespace */
@@ -266,6 +267,10 @@ printFormat(const char* format,
     state_specifier:
         state = Default;
         switch (*p) {
+            case 'c':
+                spec.value.c = va_arg(args, int);
+                spec.type = Spec::Type::Char;
+                break;
             case 'd':
             case 'i':
                 switch (spec.size) {
@@ -286,6 +291,14 @@ printFormat(const char* format,
                         break;
                 }
                 spec.type = Spec::Type::Int;
+                break;
+            case 'p':
+                spec.value.p = va_arg(args, void*);
+                spec.type = Spec::Type::Pointer;
+                break;
+            case 's':
+                spec.value.s = va_arg(args, char*);
+                spec.type = Spec::Type::String;
                 break;
             case 'X':
                 spec.capitalized = true;
@@ -309,14 +322,6 @@ printFormat(const char* format,
                         break;
                 }
                 spec.type = Spec::Type::Hex;
-                break;
-            case 'c':
-                spec.value.c = va_arg(args, int);
-                spec.type = Spec::Type::Char;
-                break;
-            case 's':
-                spec.value.s = va_arg(args, char*);
-                spec.type = Spec::Type::String;
                 break;
         }
         nchars += spec.print(cons);
