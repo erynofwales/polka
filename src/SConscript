@@ -26,6 +26,7 @@ files = [
 
     'memory/FrameAllocator.cc',
     'memory/Memory.cc',
+    'memory/Pager.cc',
 ]
 
 toolchain_bin = Dir(os.environ['POLKA_TOOLCHAIN']).Dir('bin')
