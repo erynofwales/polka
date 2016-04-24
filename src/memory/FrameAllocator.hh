@@ -16,6 +16,10 @@
 
 namespace kernel {
 
+/**
+ * Handles allocating page frames. Frames are chunks of physical memory into
+ * which pages may be allocated.
+ */
 struct FrameAllocator
 {
     FrameAllocator();
@@ -27,6 +31,8 @@ struct FrameAllocator
      * its address.
      */
     void* allocate();
+
+    // TODO: free()
 
 private:
     typedef kstd::Bitmap<u8> Bitmap;
