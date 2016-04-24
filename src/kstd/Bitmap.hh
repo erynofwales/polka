@@ -13,6 +13,60 @@
 
 namespace kstd {
 
+namespace Bit {
+
+template<typename T>
+inline bool
+get(T field,
+    u8 bit)
+{
+    return (field & (1 << bit)) > 0;
+}
+
+template<typename T>
+inline void
+set(T& field,
+    u8 bit)
+{
+    field |= T(1 << bit);
+}
+
+template<typename T>
+inline void
+clear(T& field,
+      u8 bit)
+{
+    field &= ~T(1 << bit);
+}
+
+template<typename T>
+inline T
+getMask(T field,
+        T mask)
+{
+    return field & mask;
+}
+
+template<typename T>
+inline void
+setMask(T& field,
+        T value,
+        T mask)
+{
+    // Keep everything the same (~mask), but OR in the new value
+    field = (field & ~mask) | value;
+}
+
+template<typename T>
+inline void
+clearMask(T& field,
+          T mask)
+{
+    field &= ~mask;
+}
+
+} /* namespace Bit */
+
 /** An array-like object of N bits, where N is the size of the type T given as a template parameter. */
 template <typename T>
 struct Bitmap
