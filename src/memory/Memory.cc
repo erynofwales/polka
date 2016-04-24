@@ -59,7 +59,7 @@ MemoryManager::initializeGDT()
 
 namespace memory {
 
-const usize pageSize = 4096;
+const usize pageSize = 0x1000;
 const usize pageMask = pageSize - 1;
 
 } /* namespace memory */

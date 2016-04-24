@@ -32,19 +32,22 @@ private:
 
 namespace memory {
 
+/** Size of a single page in bytes. */
 extern const usize pageSize;
 extern const usize pageMask;
 
+
 /** Align to the nearest page boundary below `addr`. */
-inline u32
-pageAlignDown(u32 addr)
+inline uptr
+pageAlignDown(uptr addr)
 {
     return addr & ~pageMask;
 }
 
+
 /** Align to the nearest page boundary above `addr`. */
-inline u32
-pageAlignUp(u32 addr)
+inline uptr
+pageAlignUp(uptr addr)
 {
     if (pageAlignDown(addr) == addr) {
         return addr;
