@@ -31,9 +31,7 @@ MemoryManager::initialize(const StartupInformation& startupInformation)
     for (auto it = multiboot->memoryMapBegin(); it != multiboot->memoryMapEnd(); ++it) {
         auto begin = (*it).base;
         auto end = begin + (*it).length - 1;
-        kstd::printFormat("  begin = 0x%08lX %08lX, end = 0x%08lX %08lX (%s)\n",
-                          u32(begin >> 32), u32(begin & 0xFFFFFFFF),
-                          u32(end >> 32), u32(end & 0xFFFFFFFF),
+        kstd::printFormat("  begin = 0x%08llX, end = 0x%08llX (%s)\n", begin, end,
                           (*it).type == 1 ? "available" : "reserved");
     }
 
