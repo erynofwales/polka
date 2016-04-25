@@ -37,8 +37,7 @@ MemoryManager::initialize(const StartupInformation& startupInformation)
 
     initializeGDT();
     mFrameAllocator.initialize(startupInformation);
-
-    void* page = mFrameAllocator.allocate();
+    mPageAllocator.initialize(startupInformation, &mFrameAllocator);
 }
 
 /*

@@ -13,6 +13,7 @@
 #include "Descriptors.hh"
 #include "StartupInformation.hh"
 #include "memory/FrameAllocator.hh"
+#include "memory/PageAllocator.hh"
 
 
 namespace kernel {
@@ -25,7 +26,8 @@ struct MemoryManager
 
 private:
     x86::GDT mGDT;
-    kernel::FrameAllocator mFrameAllocator;
+    FrameAllocator mFrameAllocator;
+    PageAllocator mPageAllocator;
 
     void initializeGDT();
 };
