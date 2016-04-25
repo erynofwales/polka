@@ -1,4 +1,4 @@
-/* Pager.cc
+/* PageAllocator.cc
  * vim: set tw=80:
  * Eryn Wells <eryn@erynwells.me>
  */
@@ -7,76 +7,107 @@
  */
 
 #include "Attributes.hh"
-#include "Pager.hh"
 #include "kstd/Bitmap.hh"
+#include "kstd/Memory.hh"
+#include "kstd/PrintFormat.hh"
 #include "memory/Memory.hh"
+#include "memory/PageAllocator.hh"
 
 namespace kernel {
 
-struct PageDirectoryEntry
+struct PageEntry
 {
-    PageDirectoryEntry();
+    PageEntry();
 
-    /** Mark the whole entry not present. */
-    void setNotPresent();
-    bool isNotPresent() const;
+    enum class Present { No = 0, Yes = 1 };
+    enum class ReadWrite { No = 0, Yes = 1 };
+    enum class UserAccess { No = 0, Yes = 1 };
+
+    void set(Present present);
+    void set(ReadWrite readWrite);
+    void set(UserAccess user);
 
     void setAddress(void* address);
 
-private:
-    static const u8 OneBit               = 0;
-    static const u8 ReadWriteBit         = 1;
-    static const u8 UserAccessBit        = 2;
-    static const u8 PageWriteThroughBit  = 3;
-    static const u8 PageCacheDisabledBit = 4;
-    static const u8 AccessedBit          = 5;
-    static const u8 DirtyBit             = 6;
-    static const u8 ZeroBit              = 7;
-    static const u32 IgnoredMask         = 0x00000F00;
+protected:
+    struct Flag {
+        static const u8 Present             = 0;
+        static const u8 ReadWrite           = 1;
+        static const u8 UserAccess          = 2;
+        static const u8 PageWriteThrough    = 3;
+        static const u8 PageCacheDisabled   = 4;
+        static const u8 Accessed            = 5;
+        static const u8 Dirty               = 6;
+        static const u8 PageAttributeTable  = 7;
+        static const u8 Global              = 8;
+    };
+
     static const u32 AddressMask         = 0xFFFFF000;
-    static const u32 FlagMask            = 0x00000FFF;
 
     u32 mEntry;
-
-    void setRequiredBits();
 };
 
-
-PageDirectoryEntry::PageDirectoryEntry()
+PageEntry::PageEntry()
     : mEntry(0)
 {
-    static_assert(sizeof(PageDirectoryEntry) == 4, "PageDirectoryEntry must be 4 bytes long.");
+    static_assert(sizeof(PageEntry) == 4, "PageEntry must be 4 bytes long.");
 }
-
-
-bool
-PageDirectoryEntry::isNotPresent()
-    const
-{
-    return mEntry == 0;
-}
-
 
 void
-PageDirectoryEntry::setNotPresent()
+PageEntry::set(Present present)
 {
-    mEntry = 0;
+    if (present == Present::Yes) {
+        kstd::Bit::set(mEntry, Flag::Present);
+    } else {
+        kstd::Bit::clear(mEntry, Flag::Present);
+    }
 }
 
+void
+PageEntry::set(ReadWrite rw)
+{
+    if (rw == ReadWrite::Yes) {
+        kstd::Bit::set(mEntry, Flag::ReadWrite);
+    } else {
+        kstd::Bit::clear(mEntry, Flag::ReadWrite);
+    }
+}
 
 void
-PageDirectoryEntry::setAddress(void* address)
+PageEntry::set(UserAccess user)
+{
+    if (user == UserAccess::Yes) {
+        kstd::Bit::set(mEntry, Flag::UserAccess);
+    } else {
+        kstd::Bit::clear(mEntry, Flag::UserAccess);
+    }
+}
+
+void
+PageEntry::setAddress(void* address)
 {
     kstd::Bit::setMask(mEntry, memory::pageAlignDown(uptr(address)), AddressMask);
 }
 
-void
-PageDirectoryEntry::setRequiredBits()
+
+struct PageDirectoryEntry
+    : public PageEntry
 {
-    kstd::Bit::set(mEntry, OneBit);
-    kstd::Bit::clear(mEntry, ZeroBit);
-    kstd::Bit::clearMask(mEntry, IgnoredMask);
+    void setFlagsForSystemDirectory();
+};
+
+void
+PageDirectoryEntry::setFlagsForSystemDirectory()
+{
+    set(PageEntry::Present::Yes);
+    set(PageEntry::ReadWrite::Yes);
+    set(PageEntry::UserAccess::No);
 }
+
+
+struct PageTableEntry
+    : public PageEntry
+{ };
 
 /*
  * Public
@@ -84,12 +115,15 @@ PageDirectoryEntry::setRequiredBits()
 
 void
 PageAllocator::initialize(const StartupInformation& startupInformation,
-                          void* pageDirectory)
+                          FrameAllocator* frameAllocator)
 {
-    mPageDirectory = reinterpret_cast<PageDirectoryEntry*>(pageDirectory);
-    for (usize i = 0; i < NumberOfEntries; i++) {
-        mPageDirectory[i].setNotPresent();
-    }
+    mPageDirectory = reinterpret_cast<PageDirectoryEntry*>(frameAllocator->allocate());
+    kstd::printFormat("Page directory at 0x%08lX\n", uptr(mPageDirectory));
+    kstd::Memory::zero(mPageDirectory, memory::pageSize * (memory::pageSize / sizeof(PageDirectoryEntry)));
+
+    auto& firstPageTable = mPageDirectory[0];
+    firstPageTable.setAddress(frameAllocator->allocate());
+    firstPageTable.setFlagsForSystemDirectory();
 }
 
 /*
